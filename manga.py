@@ -26,6 +26,10 @@ class Manga:
     def getlatestchapternum(self):
         return self.chapter
 
+    def readwatchlist(self, path):
+        file = open(path,'r')
+        texts = file.read()
+        return texts
+
     def __str__(self):
         return 'Manga: '+self.title+' Latest Chaper: '+self.chapter
-

@@ -16,7 +16,7 @@ class Manga:
             self.chapter = latestchapterlink.split('/')[-1]
 
     def generateurl(self):
-        titlenew = self.title.lower().replace(' ','-')
+        titlenew = self.title.lower().replace(' ','-')[0:-1]
         url = "https://www.readmng.com/"+titlenew
         return url
 
@@ -26,10 +26,9 @@ class Manga:
     def getlatestchapternum(self):
         return self.chapter
 
-    def readwatchlist(self, path):
-        file = open(path,'r')
-        texts = file.read()
-        return texts
+    def getpath(self):
+
+    def getchapterimageslinks(self, chapter=None):
 
     def __str__(self):
         return 'Manga: '+self.title+' Latest Chaper: '+self.chapter

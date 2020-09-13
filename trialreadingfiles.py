@@ -1,5 +1,7 @@
 import os 
 from manga import Manga
+
+
 """
 trial to read doc watchlist copy.
 decipher what manga list is to watch and check if theres latest chapters data available

@@ -3,22 +3,21 @@ import os
 import requests
 import re
 from pathlib import Path
-import downloadimg
-import img2pdf
+from downloadimg import DownloadImages
 import time
 
-url = 'https://www.readmng.com/i-am-the-sorcerer-king/108/all-pages'
+url = 'https://www.readmng.com/one-piece/990/all-pages'
+path ='downloads'+ '//' +url.split('/')[-3] + '//' +url.split('/')[-2] 
 
 response = requests.get(url)
 soup = BeautifulSoup(response.text,'html.parser')
 
-images = soup.html.body.findAll('img',{'src': True})
-
-#only get links with chapter_files
-for lines in images:
-    #print(lines.get('src'))
-    if re.search("chapter_files",lines.get('src')) != None:
-        downloadimg.download(lines.get('src'),'downloads\\')
-
+imageslinks = soup.html.body.findAll('img',{'src': re.compile('chapter_files')})
+for lines in imageslinks:
+    if len(imageslinks)!=len(os.listdir(path)):
+        download1 = DownloadImages(lines.get('src'),path)
+        download1.download()
+    else:
+        pass
 
 #to do convert pdf automatically

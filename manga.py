@@ -26,9 +26,6 @@ class Manga:
     def getlatestchapternum(self):
         return self.chapter
 
-    #def getpath(self):
-
-    #def getchapterimageslinks(self, chapter=None):
 
     def __str__(self):
         return 'Manga: '+self.title+' Latest Chaper: '+self.chapter

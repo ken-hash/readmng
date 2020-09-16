@@ -25,15 +25,16 @@ for lines in data.split('\n'):
     try:
         mangalist['manga'].append(splits[0])
         manga1 = Manga(splits[0])
+        latestchapter = manga1.getlatestchapternum()
         if splits[1].strip()!='':
-            if manga1.getlatestchapternum() == splits[1].strip():
+            if latestchapter == splits[1].strip():
                 mangalist['latestchapter'].append(splits[1].strip())
             else:
-                mangalist['latestchapter'].append(manga1.getlatestchapternum())
+                mangalist['latestchapter'].append(latestchapter)
         if splits[2].strip()!='':
             mangalist['numchapters'].append(int(splits[2].strip()))
         else:
-            mangalist['latestchapter'].append(manga1.getlatestchapternum())
+            mangalist['latestchapter'].append(latestchapter)
             mangalist['numchapters'].append(None)
     except:
         pass

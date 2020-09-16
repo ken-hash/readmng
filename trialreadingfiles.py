@@ -1,6 +1,6 @@
 import os 
 from manga import Manga
-
+import downloadimg 
 
 """
 trial to read doc watchlist copy.
@@ -16,7 +16,8 @@ file.close()
 
 mangalist = {
     'manga':[],
-    'latestchapter':[]
+    'latestchapter':[],
+    'numchapters':[]
 }
 
 for lines in data.split('\n'):
@@ -26,8 +27,11 @@ for lines in data.split('\n'):
         manga1 = Manga(splits[0])
         if splits[1].strip()!='':
             mangalist['latestchapter'].append(lines.split('-')[1].strip())
+        elif splits[2].strip()!='':
+            mangalist['numchapters'].append(lines.split('-')[2].strip())
         else:
             mangalist['latestchapter'].append(manga1.getlatestchapternum())
+            mangalist['numchapters'].append(1)
     except:
         pass
 
@@ -41,3 +45,8 @@ for lines in mangalist['manga']:
 file = open(path, 'w', encoding='utf-8')
 file.write(newwrite[:-1])
 file.close()
+
+for x in range(len(mangalist['manga'])):
+    download1 = downloadimg.DownloadImages(mangalist['manga'][x],mangalist['latestchapter'][x],mangalist['numchapter'][x])
+    download1.downloadimages()
+    #print(mangalist['manga'][x] + mangalist['latestchapter'][x])

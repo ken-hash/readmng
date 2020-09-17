@@ -1,6 +1,6 @@
 import os 
 from manga import Manga
-import downloadimg 
+from downloadimg import Downloader
 import re
 
 path = os.path.relpath('watchlist.txt')
@@ -54,5 +54,4 @@ file.write(newwrite[:-1])
 file.close()
 
 for x in range(len(mangalist['manga'])):
-    download1 = downloadimg.DownloadImages(mangalist['manga'][x],mangalist['latestchapter'][x])
-    download1.downloadLinks(mangalist['links'][x])
+    Downloader.downloadLinks(mangalist['links'][x])

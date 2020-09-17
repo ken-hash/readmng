@@ -4,21 +4,9 @@ import re
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 
-class DownloadImages:
-    def __init__(self,title,chapter):
-        self.title = title
-        self.chapter = chapter
-
-    def getpath(self):
-        path ='downloads'+ '//' +self.geturl().split('/')[-3] + '//' +self.geturl().split('/')[-2] 
-        if not os.path.isdir(path):
-            os.makedirs(path)
-        return path
-
-    def geturl(self):
-        newtitle = self.title.lower().replace(' ','-')[0:-1]
-        url = 'https://www.readmng.com/{}/{}/all-pages'.format(newtitle,self.chapter)
-        return url
+class Downloader:
+    def __init__(self):
+        pass
 
     def downloadLinks(self, links):
         for link in links:

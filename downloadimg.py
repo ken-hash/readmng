@@ -20,25 +20,12 @@ class DownloadImages:
         url = 'https://www.readmng.com/{}/{}/all-pages'.format(newtitle,self.chapter)
         return url
 
-    def downloadimages(self, numchapters=None):
-        if numchapters == None:
-            numchapters = 1
-        
-        url = self.geturl()
-        path = self.getpath()
-        chapter = float(url.split('/')[-2])
-        for x in range(numchapters):
-            newtitle = self.title.lower().replace(' ','-')[0:-1]
-            tempchapter = float(self.chapter) - x 
-            if tempchapter.is_integer()==True:
-                chapter=int(tempchapter)
-            else:
-                chapter=tempchapter
-            path ='downloads'+ '//' +self.geturl().split('/')[-3] + '//' +str(chapter)
+    def downloadLinks(self, links):
+        for link in links:
+            path ='downloads'+ '//' +link.split('/')[-3] + '//' +link.split('/')[-2]
             if not os.path.isdir(path):
                 os.makedirs(path)
-            url = 'https://www.readmng.com/{}/{}/all-pages'.format(newtitle,str(chapter))
-            response = requests.get(url)
+            response = requests.get(link)
             soup = BeautifulSoup(response.text,'html.parser')
 
             imageslinks = soup.html.body.findAll('img',{'src': re.compile('chapter_files')})

@@ -21,23 +21,19 @@ class Downloader:
                 if len(imageslinks)!=len(os.listdir(path)):
                     self.download(lines.get('src'), path)
                 else:
-                    pass
+                    continue
 
     def download(self, url, path=None):
         """
         Downloads a file given an URL and puts it in the folder `pathname`
         """
-        if path==None:
-            usepath=self.getpath()
-        else:
-            usepath=path
         # if path doesn't exist, make that path dir
         # download the body of response by chunk, not immediately
         response = requests.get(url, stream=True)
         # get the total file size
         file_size = int(response.headers.get("Content-Length", 0))
         # get the file name
-        filename = os.path.join(usepath, url.split("/")[-1])
+        filename = os.path.join(path, url.split("/")[-1])
         if not os.path.exists(filename):
             # progress bar, changing the unit to bytes instead of iteration (default by tqdm)
             progress = tqdm(response.iter_content(1024), f"Downloading {filename}", total=file_size, unit="B", unit_scale=True, unit_divisor=1024)

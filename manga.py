@@ -30,8 +30,15 @@ class Manga:
         newlink = self.chapterlinks[0]+'/all-pages'
         return newlink
 
+    def getallchapters(self):
+        return len(self.chapterlinks)
+
     def getchapterlinks(self, num):
         newlinks = []
+        if num == 'All':
+            num = self.getallchapters()
+        else:
+            num = int(num)
         for x in self.chapterlinks[0:num]:
             newlinks.append(x+'/all-pages')
         return newlinks

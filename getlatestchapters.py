@@ -23,7 +23,6 @@ for lines in data.split('\n'):
         newwrite+=lines+'\n'
         continue
     splits = lines.split('-')
-    print(splits)
     try:
         mangalist['manga'].append(splits[0])
         manga1 = Manga(splits[0])
@@ -35,18 +34,17 @@ for lines in data.split('\n'):
             mangalist['latestchapter'].append(latestchapter)
         if splits[2].strip()!='':
             mangalist['numlinks'].append(splits[2].strip())
-            mangalist['links'].append(manga1.getchapterlinks(int(splits[2].strip())))
+            mangalist['links'].append(manga1.getchapterlinks(splits[2].strip()))
         else:
             mangalist['numlinks'].append(1)
             mangalist['links'].append(manga1.getchapterlinks(1))
     except:
         pass
 
-print(mangalist)
 counter = 0
 for lines in mangalist['manga']:
     if counter<=len(mangalist['manga'])-1:
-        newwrite+=lines+ "- " +str(mangalist['latestchapter'][counter]) + " - " + str(mangalist['numlinks'][counter]) + "\n"
+        newwrite+=lines+ "- " +str(mangalist['latestchapter'][counter]) + " - " + '1' + "\n"
         counter+=1
 
 file = open(path, 'w', encoding='utf-8')
@@ -54,4 +52,4 @@ file.write(newwrite[:-1])
 file.close()
 
 for x in range(len(mangalist['manga'])):
-    Downloader.downloadLinks(mangalist['links'][x])
+    Downloader().downloadLinks(mangalist['links'][x])

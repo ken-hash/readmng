@@ -1,6 +1,8 @@
 import urllib3
 from bs4 import BeautifulSoup
 
+#class to gather information of manga and get latestchapter of the manga
+
 class Manga:
 
     def __init__(self, title, chapter=None, numchapters=None):

@@ -1,17 +1,19 @@
 from bs4 import BeautifulSoup
 import requests
 
-listname = ''
+#to be run once. scrapes all manga titles available on readmanga and its corresponding links
+#will be used for mapping for more scraping
+
+alphabet = ''
 for x in range(27):
     if x==0:
-        listname = '#'
+        alphabet = '#'
     else:
-        listname=chr(x+96)
-    url = 'https://www.readmng.com/manga-list/'+listname
+        alphabet=chr(x+64)
+    url = 'https://www.readmng.com/manga-list/'+alphabet
     response = requests.get(url).text
     soup = BeautifulSoup(response,'html.parser')
-    prettysoup = soup.prettify()
-    write = listname+"\n"
+    write = alphabet+"\n"
     data = soup.html.body.findAll('span',{'class':'manga-item'})
     for x in data:
         try:

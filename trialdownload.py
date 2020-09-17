@@ -6,6 +6,8 @@ from pathlib import Path
 from downloadimg import DownloadImages
 import time
 
+#not used trial download
+
 url = 'https://www.readmng.com/one-piece/990/all-pages'
 path ='downloads'+ '//' +url.split('/')[-3] + '//' +url.split('/')[-2] 
 
@@ -16,7 +18,7 @@ imageslinks = soup.html.body.findAll('img',{'src': re.compile('chapter_files')})
 for lines in imageslinks:
     if len(imageslinks)!=len(os.listdir(path)):
         download1 = DownloadImages(lines.get('src'),path)
-        download1.download()
+        #download1.download()
     else:
         pass
 

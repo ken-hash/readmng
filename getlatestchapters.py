@@ -2,12 +2,6 @@ import os
 from manga import Manga
 import downloadimg 
 
-"""
-trial to read doc watchlist copy.
-decipher what manga list is to watch and check if theres latest chapters data available
-if not override it as non.
-Title - None
-"""
 path = os.path.relpath('watchlist.txt')
 
 file = open(path,'r', encoding='utf-8')

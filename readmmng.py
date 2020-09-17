@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import urllib3
 
+#not used init scraping
+
 data = urllib3.PoolManager().request('GET','https://www.readmng.com/').data
 soup = BeautifulSoup(data,'html.parser')
 

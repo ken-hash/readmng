@@ -1,3 +1,4 @@
+#not used
 import os
 def checkdirectory(title,chapter):
     path = "manga/"+ title +"/"+chapter

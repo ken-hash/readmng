@@ -9,19 +9,23 @@ class Manga:
     def __init__(self, title):
         self.title = title
         self.chapterlinks = []
+        self.url = None
+        if self.url == None:
+            self.generateurl()
+        else:
+            pass
 
         if len(self.chapterlinks)<1:
-            data = urllib3.PoolManager().request('Get',self.generateurl()).data
+            data = urllib3.PoolManager().request('Get',self.url).data
             soup = BeautifulSoup(data,'html.parser')
             self.numchapters = 1
-            tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.generateurl())})
+            tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url)})
             for x in tempchapterlinks:
                 self.chapterlinks.append(x.get('href'))
 
     def generateurl(self):
-        titlenew = self.title.lower().replace(' ','-')[0:-1]
-        url = "https://www.readmng.com/"+titlenew
-        return url
+        titlenew = self.title.lower().replace(' ','-')
+        self.url = "https://www.readmng.com/"+titlenew
 
     def latestchapter(self):
         return self.chapterlinks[0].split('/')[-1]
@@ -35,7 +39,7 @@ class Manga:
 
     def getchapterlinks(self, num):
         newlinks = []
-        if num == 'All':
+        if num.lower() == 'all':
             num = self.getallchapters()
         else:
             num = int(num)

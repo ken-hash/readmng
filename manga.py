@@ -32,13 +32,19 @@ class Manga:
     def getallchapters(self):
         return len(self.chapterlinks)
 
-#returns chapter links depending on how many chapters needed to be downloaded
+#returns chapter links depending on how many chapters needed to be downloaded e.g. if set to 5, it will download latest 5 chapters
     def getchapterlinks(self, num):
         newlinks = []
+        #if set to all it will download all the available chapters else it will only download gaps
         if num.lower() == 'all':
             num = self.getallchapters()
         else:
-            num = self.getgaps()
+            #if just downloading latest chapter(1) check for gaps else download gaps + extra desired chapters
+            if(int(num)==1):
+                num=self.getgaps()
+            else:
+                num = int(num) + self.getgaps()
+                print('Found',str(num),'chapters of',self.title,'to download')
         for x in self.chapterlinks[0:num]:
             newlinks.append(x+'/all-pages')
         return newlinks
@@ -74,6 +80,4 @@ class Manga:
                     gaps+=1
                 else:
                     break
-            if gaps>0:
-                print('Found',str(gaps),'chapters of',self.title,'to download')
             return gaps

@@ -16,9 +16,13 @@ class Manga:
             data = urllib3.PoolManager().request('Get',self.url).data
             soup = BeautifulSoup(data,'html.parser')
             self.numchapters = 1
-            tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url)})
-            for x in tempchapterlinks:
-                self.chapterlinks.append(x.get('href'))
+            try:
+                tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url)})
+                for x in tempchapterlinks:
+                    self.chapterlinks.append(x.get('href'))
+            except:
+                print('Invalid title/url')
+                return
 
 #returns latest chapter number
     def latestchapter(self):
@@ -38,16 +42,16 @@ class Manga:
         #if set to all it will download all the available chapters
         if num.lower() == 'all':
             num = self.getallchapters()
+            print('Attempting to download all chapters of',self.title)
         else:
-            #if just downloading only the latest chapter(1) it will automatically check for gap release from the last downloaded chapter else it would download desired number of chapters or if the gap releases is greater than desired number of chapters then it will just fill the gap release
-            if(int(num)==1):
-                num=self.getgaps()
+            #downloads gaprelease or desired number of chapterdownloads. will always attempt to download/check last downloaded chapter for discrepancies
+            gap = self.getgaps()
+            if gap<int(num):
+                num=int(num)
             else:
-                if self.getgaps()>int(num):
-                    num = self.getgaps()
-                else:
-                    num=int(num)
+                num=gap
                 print('Found',str(num),'chapters of',self.title,'to download')
+        #will always attempt to check if latest chapter is downloaded properly
         for x in self.chapterlinks[0:num]:
             newlinks.append(x+'/all-pages')
         return newlinks
@@ -56,7 +60,7 @@ class Manga:
         path = os.path.join(os.path.realpath('downloads'),self.title)
         #download only the latest chapter if directory doesnt exist
         if not os.path.isdir(path):
-            print('New Manga found:',self.title,'Found 1 Chapter to download')
+            print('New Manga found:',self.title)
             return 1
         else:
             #list all chapters downloaded in the folder
@@ -80,7 +84,8 @@ class Manga:
                     onlinechapter = int(x.split('/')[-1])
                 except:
                     onlinechapter = float(x.split('/')[-1])
-                if onlinechapter>lastdownloaded:
+            #check last downloaded chapter if complete incase internet/power interuption
+                if onlinechapter>=lastdownloaded:
                     gaps+=1
                 else:
                     break

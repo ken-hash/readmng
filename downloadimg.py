@@ -40,10 +40,13 @@ class Downloader:
         # get the total file size
         file_size = int(response.headers.get("Content-Length", 0))
         # get the file name
+        title = path.split('//')[-2]
+        chapternum = path.split('//')[-1]
+        fileid = url.split('/')[-1]
         filename = os.path.join(path, url.split("/")[-1])
         if not os.path.exists(filename):
             # progress bar, changing the unit to bytes instead of iteration (default by tqdm)
-            progress = tqdm(response.iter_content(1024), f"Downloading {filename}", total=file_size, unit="B", unit_scale=True, unit_divisor=1024)
+            progress = tqdm(response.iter_content(1024), f"Downloading: {title} Chapter#{chapternum} Image#{fileid}", total=file_size, unit="B", unit_scale=True, unit_divisor=1024)
             with open(filename, "wb") as f:
                 for data in progress:
                     # write data read to the file

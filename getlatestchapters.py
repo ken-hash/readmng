@@ -27,18 +27,21 @@ for lines in data.split('\n'):
     #creates Manga object from manga title and adding it to mangalist
     mangalist['manga'].append(splits[0].strip())
     manga1 = Manga(splits[0].strip())
-    latestchapter = manga1.latestchapter()
-    print('Manga: \'',splits[0].strip(),'\' Latest Chapter is',latestchapter)
-    mangalist['latestchapter'].append(latestchapter)
-    #checks if format is followed Would automatically download latest chapter if only Manga Title is suppolied
-    if len(splits)<3:
-            mangalist['links'].append(manga1.getchapterlinks('1'))
-    else:
-        #if third value is supplied e.g. download 5 chapters or download 'All'
-        if splits[2].strip()!='':
-            mangalist['links'].append(manga1.getchapterlinks(splits[2].strip()))
+    try:
+        latestchapter = manga1.latestchapter()
+        print('Manga: \'',splits[0].strip(),'\' Latest Chapter is',latestchapter)
+        mangalist['latestchapter'].append(latestchapter)
+        #checks if format is followed Would automatically download latest chapter if only Manga Title is suppolied
+        if len(splits)<3:
+                mangalist['links'].append(manga1.getchapterlinks('1'))
         else:
-            mangalist['links'].append(manga1.getchapterlinks('1'))
+            #if third value is supplied e.g. download 5 chapters or download 'All'
+            if splits[2].strip()!='':
+                mangalist['links'].append(manga1.getchapterlinks(splits[2].strip()))
+            else:
+                mangalist['links'].append(manga1.getchapterlinks('1'))
+    except:
+        continue
 
 for x in range(len(mangalist['manga'])):
     Downloader().downloadLinks(mangalist['links'][x])

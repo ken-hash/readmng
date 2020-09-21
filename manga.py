@@ -3,8 +3,7 @@ from bs4 import BeautifulSoup
 import os
 import re
 
-#class to gather information of manga and get latestchapter of the manga
-
+#class Manga to gather information about argument Manga title contains information about chapterlinks, lastest chapter of the manga
 class Manga:
 
     def __init__(self, title):
@@ -13,7 +12,7 @@ class Manga:
         self.url = "https://www.readmng.com/"+self.title
 
 #scrapes all chapters listed in website lastest chapter being first item and last chapter being the first chapter
-        if len(self.chapterlinks)<1:
+        if not self.chapterlinks:
             data = urllib3.PoolManager().request('Get',self.url).data
             soup = BeautifulSoup(data,'html.parser')
             self.numchapters = 1
@@ -33,39 +32,48 @@ class Manga:
     def getallchapters(self):
         return len(self.chapterlinks)
 
-#returns chapter links depending on how many chapters needed
+#returns chapter links depending on how many chapters needed to be downloaded
     def getchapterlinks(self, num):
         newlinks = []
         if num.lower() == 'all':
             num = self.getallchapters()
         else:
-            num = int(num)
+            num = self.getgaps()
         for x in self.chapterlinks[0:num]:
             newlinks.append(x+'/all-pages')
         return newlinks
 
-
-#experimental to-do as need to consider decimal chapter gaps
     def getgaps(self):
         path = os.path.join(os.path.realpath('downloads'),self.title)
-        listitems = os.listdir(path)
-        listitems.sort()
-        #will break if theres nonstring folder names
-        min=int(listitems[0])
-        max=int(listitems[0])
-        for x in listitems:
-            y = int(x)
-            if y <= min:
-                min=y
-            if y >= max:
-                max=y
-        print(min, max)
-        #one solution maybe check max(chapter) folder then compare list from links(getting how many chapter from that max to the latest) and download gap chapters
-        #exception when its None/empty
-        if (max-min)+1 == len(listitems):
-            print('No gaps')
+        #download only the latest chapter if directory doesnt exist
+        if not os.path.isdir(path):
+            print('New Manga found:',self.title,'Found 1 Chapter to download')
+            return 1
         else:
-            print('There is gaps')
-        return listitems
-
-
+            listitems = os.listdir(path)
+            lastdownloaded = 0
+            #get last downloaded chapter number
+            for x in listitems:
+                try:
+                    x = int(x)
+                except:
+                    try:
+                        x = float(x)
+                    except:
+                        continue
+                if x>lastdownloaded:
+                    lastdownloaded=x
+            gaps=0
+            #check how many chapter releases from last chapter downloaded
+            for x in self.chapterlinks:
+                try:
+                    onlinechapter = int(x.split('/')[-1])
+                except:
+                    onlinechapter = float(x.split('/')[-1])
+                if onlinechapter>lastdownloaded:
+                    gaps+=1
+                else:
+                    break
+            if gaps>0:
+                print('Found',str(gaps),'chapters of',self.title,'to download')
+            return gaps

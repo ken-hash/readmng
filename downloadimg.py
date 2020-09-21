@@ -11,20 +11,25 @@ class Downloader:
 
     #download function needing list containing links to be downloaded
     def downloadLinks(self, links):
-        for link in links:
-            path ='downloads'+ '//' +link.split('/')[-3] + '//' +link.split('/')[-2]
-            # if path doesn't exist, make that path dir
-            if not os.path.isdir(path):
-                os.makedirs(path)
-            response = requests.get(link)
-            soup = BeautifulSoup(response.text,'html.parser')
+        if not links:
+            return 
+        else:
+            #downloading in reverse order so latest chapter will be downloaded last
+            for link in links[::-1]:
+                path ='downloads'+ '//' +link.split('/')[-3] + '//' +link.split('/')[-2]
+                # if path doesn't exist, make that path dir
+                if not os.path.isdir(path):
+                    os.makedirs(path)
+                response = requests.get(link)
+                soup = BeautifulSoup(response.text,'html.parser')
 
-            imageslinks = soup.html.body.findAll('img',{'src': re.compile('chapter_files')})
-            for lines in imageslinks:
-                if len(imageslinks)!=len(os.listdir(path)):
-                    self.download(lines.get('src'), path)
-                else:
-                    continue
+                #parsing imagelinks from the link provided
+                imageslinks = soup.html.body.findAll('img',{'src': re.compile('chapter_files')})
+                for lines in imageslinks:
+                    if len(imageslinks)!=len(os.listdir(path)):
+                        self.download(lines.get('src'), path)
+                    else:
+                        continue
 
     def download(self, url, path=None):
         """

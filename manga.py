@@ -11,7 +11,7 @@ class Manga:
         self.chapterlinks = []
         self.url = "https://www.readmng.com/"+self.title
 
-#scrapes all chapters listed in website lastest chapter being first item and last chapter being the first chapter
+#scrapes all chapters listed in website lastest chapter being first item and first chapter being the last item
         if not self.chapterlinks:
             data = urllib3.PoolManager().request('Get',self.url).data
             soup = BeautifulSoup(data,'html.parser')
@@ -35,11 +35,11 @@ class Manga:
 #returns chapter links depending on how many chapters needed to be downloaded e.g. if set to 5, it will download latest 5 chapters
     def getchapterlinks(self, num):
         newlinks = []
-        #if set to all it will download all the available chapters else it will only download gaps
+        #if set to all it will download all the available chapters
         if num.lower() == 'all':
             num = self.getallchapters()
         else:
-            #if just downloading latest chapter(1) check for gaps else download gaps + extra desired chapters
+            #if just downloading only the latest chapter(1) it will automatically check for gap release from the last downloaded chapter else it would download desired number of chapters plus the gap releases
             if(int(num)==1):
                 num=self.getgaps()
             else:
@@ -56,9 +56,10 @@ class Manga:
             print('New Manga found:',self.title,'Found 1 Chapter to download')
             return 1
         else:
+            #list all chapters downloaded in the folder
             listitems = os.listdir(path)
             lastdownloaded = 0
-            #get last downloaded chapter number
+            #get last downloaded chapter number 
             for x in listitems:
                 try:
                     x = int(x)

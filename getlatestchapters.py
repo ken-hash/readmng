@@ -3,6 +3,7 @@ from manga import Manga
 from downloadimg import Downloader
 import re
 
+#reads watchlist.txt to see what manga to download
 path = os.path.relpath('watchlist.txt')
 
 file = open(path,'r', encoding='utf-8')
@@ -17,16 +18,19 @@ mangalist = {
 
 newwrite = ''
 
+# if an entry in watchlist starts has # it would be included
 for lines in data.split('\n'):
     if re.search('#',lines):
         newwrite+=lines+'\n'
         continue
     splits = lines.split('-')
+    #creates Manga object from manga title and adding it to mangalist
     mangalist['manga'].append(splits[0].strip())
     manga1 = Manga(splits[0].strip())
     latestchapter = manga1.latestchapter()
     print('Manga: \'',splits[0].strip(),'\' Latest Chapter is',latestchapter)
     mangalist['latestchapter'].append(latestchapter)
+    #checks if format is followed Would automatically download latest chapter if only Manga Title is suppolied
     if len(splits)<3:
             mangalist['links'].append(manga1.getchapterlinks('1'))
     else:

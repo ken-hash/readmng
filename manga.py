@@ -39,11 +39,14 @@ class Manga:
         if num.lower() == 'all':
             num = self.getallchapters()
         else:
-            #if just downloading only the latest chapter(1) it will automatically check for gap release from the last downloaded chapter else it would download desired number of chapters plus the gap releases
+            #if just downloading only the latest chapter(1) it will automatically check for gap release from the last downloaded chapter else it would download desired number of chapters or if the gap releases is greater than desired number of chapters then it will just fill the gap release
             if(int(num)==1):
                 num=self.getgaps()
             else:
-                num = int(num) + self.getgaps()
+                if self.getgaps()>int(num):
+                    num = self.getgaps()
+                else:
+                    num=int(num)
                 print('Found',str(num),'chapters of',self.title,'to download')
         for x in self.chapterlinks[0:num]:
             newlinks.append(x+'/all-pages')

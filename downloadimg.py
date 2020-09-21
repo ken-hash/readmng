@@ -5,12 +5,15 @@ from tqdm import tqdm
 from bs4 import BeautifulSoup
 
 class Downloader:
+    #useless code
     def __init__(self):
         pass
 
+    #download function needing list containing links to be downloaded
     def downloadLinks(self, links):
         for link in links:
             path ='downloads'+ '//' +link.split('/')[-3] + '//' +link.split('/')[-2]
+            # if path doesn't exist, make that path dir
             if not os.path.isdir(path):
                 os.makedirs(path)
             response = requests.get(link)
@@ -27,7 +30,6 @@ class Downloader:
         """
         Downloads a file given an URL and puts it in the folder `pathname`
         """
-        # if path doesn't exist, make that path dir
         # download the body of response by chunk, not immediately
         response = requests.get(url, stream=True)
         # get the total file size

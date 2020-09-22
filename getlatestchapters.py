@@ -58,4 +58,4 @@ file = open(path, 'w', encoding='utf-8')
 file.write(newwrite[:-1])
 file.close()
 
-input("All Manga titles are now up to date. Press <enter> to exit.")
+os.system('pause')

@@ -21,7 +21,7 @@ class Manga:
                 for x in tempchapterlinks:
                     self.chapterlinks.append(x.get('href'))
             except:
-                print('Invalid title/url')
+                print('Invalid title/url. Please see listTitles.txt for titles to use')
                 return
 
 #returns latest chapter number
@@ -41,19 +41,19 @@ class Manga:
         newlinks = []
         #if set to all it will download all the available chapters
         if num.lower() == 'all':
-            num = self.getallchapters()
+            numchap = self.getallchapters()
             print('Attempting to download all chapters of',self.title)
         else:
             #downloads gaprelease or desired number of chapterdownloads. will always attempt to download/check last downloaded chapter for discrepancies
             gap = self.getgaps()
             if gap<int(num):
-                num=int(num)
+                numchap=int(num)
             else:
-                num=gap
-            if(int(num)>1):
-                print('Found',str(num-1),'chapters of',self.title,'to download')
+                numchap=gap
+            if(int(numchap)>1):
+                print('Found',str(numchap),'chapters of',self.title,'to download')
         #will always attempt to check if latest chapter is downloaded properly
-        for x in self.chapterlinks[0:num]:
+        for x in self.chapterlinks[0:numchap]:
             newlinks.append(x+'/all-pages')
         return newlinks
 
@@ -62,7 +62,7 @@ class Manga:
         #download only the latest chapter if directory doesnt exist
         if not os.path.isdir(path):
             print('New Manga found:',self.title)
-            return 1
+            return 0
         else:
             #list all chapters downloaded in the folder
             listitems = os.listdir(path)

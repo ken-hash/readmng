@@ -25,10 +25,10 @@ for lines in data.split('\n'):
         continue
     splits = lines.split('-')
     #creates Manga object from manga title and adding it to mangalist
-    mangalist['manga'].append(splits[0].strip())
     manga1 = Manga(splits[0].strip())
     try:
         latestchapter = manga1.latestchapter()
+        mangalist['manga'].append(splits[0].strip())
         print('Manga: \'',splits[0].strip(),'\' Latest Chapter is',latestchapter)
         mangalist['latestchapter'].append(latestchapter)
         #checks if format is followed Would automatically download latest chapter if only Manga Title is suppolied
@@ -42,6 +42,8 @@ for lines in data.split('\n'):
                 mangalist['links'].append(manga1.getchapterlinks('1'))
     except:
         continue
+
+print(mangalist)
 
 for x in range(len(mangalist['manga'])):
     Downloader().downloadLinks(mangalist['links'][x])

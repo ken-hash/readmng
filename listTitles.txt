@@ -1,5 +1,5 @@
 Manga Title - Titles to use
- lines.upper()                                    - Titles to use
+#                                                 - Titles to use
 
 Freezing Zero                                      - freezing_zero
 Immemorial Mad Devil                               -  immemorial mad devil
@@ -45,7 +45,7 @@ $100 is Too Cheap                                  - 100_is_too_cheap
 √P                                                 -      p
 ○○×Kokuhaku×Ore                                    - kokuhaku_ore
 
- lines.upper()                                    - Titles to use
+A                                                 - Titles to use
 
 A Bat & 2 Balls                                    - a_bat_2_balls
 A Bias Girl                                        - a bias girl
@@ -1083,7 +1083,7 @@ Azure Dream                                        - azure_dream
 Azusa                                              -  azusa
 AлёIIIa                                            - a_iiia
 
- lines.upper()                                    - Titles to use
+B                                                 - Titles to use
 
 B Gata H Kei                                       - b gata h kei
 B Grade                                            - b grade
@@ -1918,7 +1918,7 @@ Byouto Shoujo Kan                                  - byouto_shoujo_kan
 Byul Bit So Ge                                     - byul_bit_so_ge
 B♭ no Sonata                                       - b_no_sonata
 
- lines.upper()                                    - Titles to use
+C                                                 - Titles to use
 
 C-Blossom                                          - c blossom case 729
 C-Kei Otome Renmei                                 - c kei otome renmei
@@ -2600,7 +2600,7 @@ Cynical World                                      - cynical world
 Cynthia the Mission                                - cynthia the mission
 C♥C♥C                                              -  c_c_c
 
- lines.upper()                                    - Titles to use
+D                                                 - Titles to use
 
 D no Fuuin                                         - d no fuuin
 D Senjou no Alice                                  - d senjou no alice
@@ -3282,7 +3282,7 @@ Dynamite Milk Pie                                  - dynamite milk pie
 Dynamite na Honey                                  - dynamite_na_honey
 Dystopia                                           - dystopia
 
- lines.upper()                                    - Titles to use
+E                                                 - Titles to use
 
 E (KIRIGAOKA Sana)                                 - e_kirigaoka_sana
 E                                                  - e the next generation of personal computer
@@ -3511,7 +3511,7 @@ Eyed Soul                                          - eyed soul
 Eyeshield 21                                       - eyeshield 21
 Ezakike e Youkoso                                  - ezakike e youkoso
 
- lines.upper()                                    - Titles to use
+F                                                 - Titles to use
 
 F no Meikyuu                                       - f_no_meikyuu
 F-Anos (Fallen-Angel of New Order Sin)             - f anos fallen angel of new order sin
@@ -3951,7 +3951,7 @@ Fuyu Kaze wa Dare ga Hiku                          - fuyu_kaze_wa_dare_ga_hiku
 Fuyu no Hana                                       - fuyu_no_hana
 Fuyu no Roman Minshuku                             - fuyu no roman minshuku
 
- lines.upper()                                    - Titles to use
+G                                                 - Titles to use
 
 G (Yamada Hitotsuki)                               - g yamada hitotsuki
 G School                                           - g school
@@ -4571,7 +4571,7 @@ Gyu tte Shite Ii                                   - gyu_tte_shite_ii
 Gyu...tte Shite Ii?                                - gyu tte shite ii
 Gyutto Shite Chuu                                  - gyutto shite chuu
 
- lines.upper()                                    - Titles to use
+H                                                 - Titles to use
 
 H                                                  -      h
 H.E                                                - h e the hunt for energy
@@ -5586,7 +5586,7 @@ Hyulla's Race                                      - hyullas race
 H² Love                                            - h_love
 H³ School!                                         - h³ school
 
- lines.upper()                                    - Titles to use
+I                                                 - Titles to use
 
 I Accept You                                       - i accept you
 I Am a Child of This House                         - i am a child of this house
@@ -6100,7 +6100,7 @@ I’m a Middle-Aged Man Who Got My Adventurer License Revoked - im a middle aged
 I’m An Evil God                                    - im an evil god
 I’ve Been Killing Slimes for 300 Years and Maxed Out My Level - ive been killing slimes for 300 years and maxed out my level
 
- lines.upper()                                    - Titles to use
+J                                                 - Titles to use
 
 J no Subete                                        - j no subete
 J- Dream Hishouhen                                 - j dream hishouhen
@@ -6337,7 +6337,7 @@ JXs                                                -   jx s
 Jyoshikausei                                       - jyoshikausei
 Jyuki Ningen Jumbor                                - jyuki ningen jumbor
 
- lines.upper()                                    - Titles to use
+K                                                 - Titles to use
 
 K                                                  - k days of blue
 K                                                  - k memory of red
@@ -7783,7 +7783,7 @@ Kyuuma!                                            - kyuuma
 Kyuusen no Shima                                   - kyuusen no shima
 Kyuuso wa Cheese no Yume o Miru                    - kyuuso wa cheese no yume o miru
 
- lines.upper()                                    - Titles to use
+L                                                 - Titles to use
 
 L-DK                                               -   l dk
 L-size Little Sister                               - l size little sister
@@ -8273,7 +8273,7 @@ Lycanthrope Leo                                    - lycanthrope leo
 Lying Mii-kun and Broken Maa-chan: Precious Lies   - lying mii kun and broken maa chan precious lies
 L∞P                                                -    l_p
 
- lines.upper()                                    - Titles to use
+M                                                 - Titles to use
 
 M nano? Baka nano? Hentai nano?                    - m_nano_baka_nano_hentai_nano
 M no Retsujou                                      - m_no_retsujou
@@ -9440,7 +9440,7 @@ Myuu and I                                         - myuu and i
 Myuuzu Gakuen de Aou                               - myuuzu gakuen de aou
 MZ                                                 -     mz
 
- lines.upper()                                    - Titles to use
+N                                                 - Titles to use
 
 N is for Nishiki                                   - n_is_for_nishiki
 N.G!                                               -    n_g
@@ -9945,7 +9945,7 @@ Nyatto!                                            - nyatto
 Nyotai ka                                          - nyotai ka
 Nyotai-ka                                          - nyotai_ka
 
- lines.upper()                                    - Titles to use
+O                                                 - Titles to use
 
 O-Guts!                                            - o_guts
 O.L.D                                              -  o l d
@@ -10566,7 +10566,7 @@ Ozanari Dungeon                                    - ozanari dungeon
 Ozmafia!!                                          - ozmafia
 Ozu no Kakashi Tsukai                              - ozu_no_kakashi_tsukai
 
- lines.upper()                                    - Titles to use
+P                                                 - Titles to use
 
 P Angel                                            - p_angel
 P no Higeki                                        - p no higeki
@@ -11047,7 +11047,7 @@ Pygmalio                                           - pygmalio
 Pyu to Fuku! Jaguar                                - pyu_to_fuku_jaguar
 P×P                                                -    p_p
 
- lines.upper()                                    - Titles to use
+Q                                                 - Titles to use
 
 Q (SHIHIRA Tatsuya)                                - q shihira tatsuya
 Q And A                                            - q and a
@@ -11078,7 +11078,7 @@ Quick Start!!                                      - quick start
 Quick Witted Boy                                   - quick_witted_boy
 Qwan                                               -   qwan
 
- lines.upper()                                    - Titles to use
+R                                                 - Titles to use
 
 R Princess                                         - r princess
 R-15                                               -   r 15
@@ -11554,7 +11554,7 @@ Ryuurouden                                         - ryuurouden
 Ryuusei Astromance                                 - ryuusei_astromance
 R²                                                 -      r
 
- lines.upper()                                    - Titles to use
+S                                                 - Titles to use
 
 S Friend                                           - s friend
 S I N                                              -  s_i_n
@@ -13410,7 +13410,7 @@ Syrup [Bitter] Anthology                           - syrup bitter anthology
 Syrup! [bitter]                                    - syrup_bitter
 System of Romance                                  - system of romance
 
- lines.upper()                                    - Titles to use
+T                                                 - Titles to use
 
 T R A P                                            - t_r_a_p
 T x S                                              -  t_x_s
@@ -14783,7 +14783,7 @@ Type-Moon                                          - type moon t moon complex ex
 Type-Moon                                          - type_moon_t_moon_complex_x
 Tzubakisaka Tricolor                               - tzubakisaka tricolor
 
- lines.upper()                                    - Titles to use
+U                                                 - Titles to use
 
 U Dont Know Me                                     - u don t know me
 U wa Uchuusen no U                                 - u wa uchuusen no u
@@ -15029,7 +15029,7 @@ Uwasaya                                            - uwasaya
 Uwate na Otoko no Otoshikata                       - uwate na otoko no otoshikata
 Uzumaki                                            - uzumaki
 
- lines.upper()                                    - Titles to use
+V                                                 - Titles to use
 
 V                                                  - v egao no tameni
 V Hunter                                           - v_hunter
@@ -15167,7 +15167,7 @@ Voyeurs, Inc.                                      - voyeurs_inc
 VS [Versus]                                        - vs_versus
 Vulgar Ghost Daydream                              - vulgar ghost daydream
 
- lines.upper()                                    - Titles to use
+W                                                 - Titles to use
 
 W Change                                           - w_change
 W Change!!                                         - w change
@@ -15505,7 +15505,7 @@ Wu dao du zun                                      - wu dao du zun
 Wu Dong Qian Kun                                   - wu dong qian kun
 www.You are so Busted.com                          - www_you_are_so_busted_com
 
- lines.upper()                                    - Titles to use
+X                                                 - Titles to use
 
 X                                                  - x epoch of the dragon
 X 1999                                             - x 1999
@@ -15539,7 +15539,7 @@ XXX Kiss Mark                                      - xxx_kiss_mark
 xxxHolic                                           - xxxholic
 xxxHOLiC Rei                                       - xxxholic rei
 
- lines.upper()                                    - Titles to use
+Y                                                 - Titles to use
 
 Ya Oee                                             - ya_oee
 Ya San                                             - ya_san
@@ -15935,7 +15935,7 @@ Yuyushiki                                          - yuyushiki
 Yuzu Chu                                           - yuzu chu
 Y十M                                                -    y_m
 
- lines.upper()                                    - Titles to use
+Z                                                 - Titles to use
 
 Z                                                  - z_suites
 Zai x 10                                           - zai x 10
@@ -16053,5 +16053,5 @@ Zutto Miteita Mono desu kara                       - zutto_miteita_mono_desu_kar
 Zutto Suki Datta Kuse ni                           - zutto suki datta kuse ni
 Zwembad                                            - zwembad
 
- lines.upper()                                    - Titles to use
+                                                  - Titles to use
 

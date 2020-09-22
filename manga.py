@@ -62,7 +62,7 @@ class Manga:
         #download only the latest chapter if directory doesnt exist
         if not os.path.isdir(path):
             print('New Manga found:',self.title)
-            return 0
+            return 1
         else:
             #list all chapters downloaded in the folder
             listitems = os.listdir(path)

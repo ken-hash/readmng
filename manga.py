@@ -52,8 +52,6 @@ class Manga:
                 num=gap
             if(int(num)>1):
                 print('Found',str(num-1),'chapters of',self.title,'to download')
-            else:
-                print('Checking last downloaded chapter for discrepancies')
         #will always attempt to check if latest chapter is downloaded properly
         for x in self.chapterlinks[0:num]:
             newlinks.append(x+'/all-pages')

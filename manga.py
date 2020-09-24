@@ -14,7 +14,7 @@ class Manga:
 #scrapes all chapters listed in website lastest chapter being first item and first chapter being the last item
         if not self.chapterlinks:
             data = urllib3.PoolManager().request('Get',self.url).data
-            soup = BeautifulSoup(data,'html.parser')
+            soup = BeautifulSoup(data,'lxml')
             self.numchapters = 1
             try:
                 tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url)})
@@ -50,8 +50,8 @@ class Manga:
                 numchap=int(num)
             else:
                 numchap=gap
-            if(int(numchap)>1):
-                print('Found',str(numchap),'chapters of',self.title,'to download')
+            if(int(num)>1):
+                print('Found',str(numchap-1),'chapters of',self.title,'to download')
         #will always attempt to check if latest chapter is downloaded properly
         for x in self.chapterlinks[0:numchap]:
             newlinks.append(x+'/all-pages')

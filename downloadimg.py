@@ -24,7 +24,7 @@ class Downloader:
                 soup = BeautifulSoup(response.text,'lxml')
                 #parsing imagelinks from the link provided
                 imageslinks = soup.html.body.findAll('img',{'src': re.compile('chapter_files')})
-                print(f"Checking for Chapter {link.split('/')[-2]} {link.split('/')[-3]}.Found {len(os.listdir(path))} of {len(imageslinks)} ")
+                print(f"Checking for Chapter {link.split('/')[-2]:>5s} of {link.split('/')[-3]+'.':<20}Found {len(os.listdir(path))} of {len(imageslinks)} ")
                 for lines in imageslinks:
                     if len(imageslinks)!=len(os.listdir(path)):
                         self.download(lines.get('src'), path)

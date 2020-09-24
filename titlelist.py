@@ -24,7 +24,7 @@ for lines in data:
 
 write = 'Manga Title - Titles to use'
 for x in range(len(myManga['realtitle'])):
-    write+='{:<50} - {:>6s}'.format(myManga['realtitle'][x],myManga['title'][x])+'\n'
+    write+='{:<50} - {:>2s}'.format(myManga['realtitle'][x],myManga['title'][x])+'\n'
     
 path = os.path.realpath(r'readmng\listTitles.txt')
 file = open(path,'w',encoding='utf-8')

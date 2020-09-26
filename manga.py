@@ -17,7 +17,7 @@ class Manga:
             soup = BeautifulSoup(data,'lxml')
             self.numchapters = 1
             try:
-                tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url)})
+                tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url,re.IGNORECASE)})
                 for x in tempchapterlinks:
                     self.chapterlinks.append(x.get('href'))
             except:

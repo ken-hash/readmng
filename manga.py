@@ -28,6 +28,8 @@ class Manga:
     def latestchapter(self):
         return self.chapterlinks[0].split('/')[-1]
 
+    def geturl(self):
+        return self.url
 
     def latestchapterlink(self):
         newlink = self.chapterlinks[0]+'/all-pages'

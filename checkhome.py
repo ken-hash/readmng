@@ -2,6 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from manga import Manga
+from downloadimg import Downloader
 import re
 
 #reads watchlist.txt to see what manga to download
@@ -16,6 +17,11 @@ mangalist = {
     'mangalink':[],
 }
 
+todownload = {
+    'manga':[],
+    'chapterlinks':[],
+}
+
 newwrite = ''
 numupdates = 0
 
@@ -25,25 +31,33 @@ for lines in data.split('\n'):
         newwrite+=lines+'\n'
         continue
     splits = lines.split('-')
-    manga1 = Manga(splits[0].strip())
-    mangalist['mangalink'].append(manga1.geturl())
-    mangalist['manga'].append(splits[0].strip())
+    title = splits[0].strip()
+    urlmanga = "https://www.readmng.com/"+ title.lower().replace(' ','-')
+    mangalist['mangalink'].append(urlmanga)
+    mangalist['manga'].append(title)
 
+#checks homepage if theres an update of any manga in the watchlist
 url = "https://www.readmng.com/"
 html = requests.get(url).text
 soup = BeautifulSoup(html,'lxml')
 mangaupdates = soup.findAll('a',{'class':'manga_info'})
 
+#creates new list for updated manga
 for x in mangaupdates:
     title = x.get('title')
     link = x.get('href')
-    if link in mangalist['mangalink']:
+    if link.lower() in mangalist['mangalink']:
         print(f'Found Manga Update of {title}')
+        striptitle = link.split('.com/')[1].replace('-',' ')
+        todownload['manga'].append(striptitle)
         numupdates+=1
 
-path = os.path.realpath('getlatestchapters.exe')
-print(path)
-if numupdates >1:
-    os.system(path)
+#download only the updated manga titles
+if numupdates >=1:
+    for manga in todownload['manga']:
+        manga1 = Manga(manga)
+        todownload['chapterlinks'].append(manga1.getchapterlinks('1'))
+    for x in range(len(todownload['manga'])):
+        Downloader().downloadLinks(todownload['chapterlinks'][x])
 
 os.system('pause')

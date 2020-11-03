@@ -7,10 +7,9 @@ import re
 class Manga:
 
     def __init__(self, title):
-        self.title = title.lower().replace(' ','-')
+        self.title=title
         self.chapterlinks = []
         self.url = "https://asurascans.com/"+self.title
-
 #scrapes all chapters listed in website lastest chapter being first item and first chapter being the last item
         if not self.chapterlinks:
             data = urllib3.PoolManager().request('Get',self.url).data
@@ -19,7 +18,6 @@ class Manga:
             try:
                 tempchapterlinks = soup.html.body.findAll('div',{'class':'eph-num'})
                 for x in tempchapterlinks:
-                    print(x.find('a').get('href'))
                     self.chapterlinks.append(x.find('a').get('href'))
             except:
                 print('Invalid title/url. Please see listTitles.txt for titles to use')

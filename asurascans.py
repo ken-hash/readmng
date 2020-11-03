@@ -24,8 +24,10 @@ while(url!=None):
     soup = BeautifulSoup(data,'lxml')
     title = soup.html.body.findAll('div',{'class':'bsx'})
     for x in title:
-        mangalist['manga'].append(x.find('div',{'class':"tt"}).text.strip())
-        mangalist['baselink'].append(x.find('a').get('href'))
+        singlelink = x.find('a').get('href')
+        singletitle = singlelink.split('/')
+        mangalist['manga'].append(singletitle[-2])
+        mangalist['baselink'].append(singlelink)
     pagenum = soup.html.body.find('div',{'class':'hpage'})
     if pagenum.get_text().strip() != 'Previous':
         url = mangalistUrl + pagenum.find('a').get('href')
@@ -41,6 +43,8 @@ for x in mangalist['manga']:
         mangalist['links'].append(manga1.getchapterlinks('All'))
     except:
         continue
+
+print(mangalist)
 
 for x in range(len(mangalist['manga'])):
     Downloader().downloadLinks(mangalist['links'][x])

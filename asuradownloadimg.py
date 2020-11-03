@@ -47,6 +47,8 @@ class Downloader:
         title = path.split('//')[-2]
         chapternum = path.split('//')[-1]
         type1 = url.split('/')[-1].split('.')[-1]
+        if type1 == 'gif':
+            return
         fileid = f"Image_{counter}.{type1}"
         filename = os.path.join(path, fileid)
         if not os.path.exists(filename):

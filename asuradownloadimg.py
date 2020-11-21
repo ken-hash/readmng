@@ -29,7 +29,7 @@ class Downloader:
                 print(f"Checking for Chapter {link.split('/')[-2]:>5s} of {link.split('/')[-3]+'.':<20}Found {len(os.listdir(path))} of {len(imageslinks)} ")
                 counter = 0
                 for lines in imageslinks:
-                    if len(imageslinks)!=len(os.listdir(path)):
+                    if len(imageslinks)-2>=len(os.listdir(path)):
                         self.download(lines.get('src'),counter, path)
                     else:
                         continue

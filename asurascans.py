@@ -44,7 +44,5 @@ for x in mangalist['manga']:
     except:
         continue
 
-print(mangalist)
-
 for x in range(len(mangalist['manga'])):
     Downloader().downloadLinks(mangalist['links'][x])

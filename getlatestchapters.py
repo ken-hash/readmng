@@ -1,4 +1,5 @@
 import os 
+from refreshfolders import RefreshIt
 from manga import Manga
 from downloadimg import Downloader
 import re
@@ -58,4 +59,5 @@ file = open(path, 'w', encoding='utf-8')
 file.write(newwrite[:-1])
 file.close()
 
+RefreshIt().refresh()
 os.system('pause')

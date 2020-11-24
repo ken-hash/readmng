@@ -2,6 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from manga import Manga
+from refreshfolders import RefreshIt
 from downloadimg import Downloader
 import re
 
@@ -59,5 +60,5 @@ if numupdates >=1:
         todownload['chapterlinks'].append(manga1.getchapterlinks('1'))
     for x in range(len(todownload['manga'])):
         Downloader().downloadLinks(todownload['chapterlinks'][x])
-
+RefreshIt().refresh()
 os.system('pause')

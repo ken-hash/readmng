@@ -5,7 +5,6 @@ from manga import Manga
 from downloadimg import Downloader
 import re
 import time
-import datetime
 
 while True:
     #reads watchlist.txt to see what manga to download
@@ -62,6 +61,5 @@ while True:
             todownload['chapterlinks'].append(manga1.getchapterlinks('1'))
         for x in range(len(todownload['manga'])):
             Downloader().downloadLinks(todownload['chapterlinks'][x])
-
-    print(f'{datetime.datetime.now()}')
-    time.sleep(600)
+    os.system('python refreshfolders.py')
+    time.sleep(1800)

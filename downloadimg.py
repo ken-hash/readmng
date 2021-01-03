@@ -1,6 +1,7 @@
 import os 
 import requests
 import re
+import concurrent.futures
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 
@@ -25,11 +26,12 @@ class Downloader:
                 #parsing imagelinks from the link provided
                 imageslinks = soup.html.body.findAll('img',{'src': re.compile('chapter_files')})
                 print(f"Checking for Chapter {link.split('/')[-2]:>5s} of {link.split('/')[-3]+'.':<20}Found {len(os.listdir(path))} of {len(imageslinks)} ")
-                for lines in imageslinks:
-                    if len(imageslinks)!=len(os.listdir(path)):
-                        self.download(lines.get('src'), path)
-                    else:
-                        continue
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    for lines in imageslinks:
+                        if len(imageslinks)!=len(os.listdir(path)):
+                            executor.submit(self.download(lines.get('src'),path))
+                        else:
+                            continue
 
     def download(self, url, path=None):
         """

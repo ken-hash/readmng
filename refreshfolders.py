@@ -8,4 +8,7 @@ class RefreshIt:
         listfolders = os.listdir(path)
         for folder in listfolders:
             newpath = path + '\\' + folder
+            print(f'Refreshing folders of {folder}')
             pass
+
+RefreshIt().refresh()

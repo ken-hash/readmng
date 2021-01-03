@@ -29,7 +29,7 @@ class Downloader:
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     for lines in imageslinks:
                         if len(imageslinks)!=len(os.listdir(path)):
-                            executor.submit(self.download(lines.get('src'),path))
+                            executor.submit(self.download,lines.get('src'),path)
                         else:
                             continue
 

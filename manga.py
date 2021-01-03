@@ -74,10 +74,7 @@ class Manga:
                 try:
                     x = int(x)
                 except:
-                    try:
-                        x = float(x)
-                    except:
-                        continue
+                    continue
                 if x>lastdownloaded:
                     lastdownloaded=x
             gaps=0
@@ -85,13 +82,14 @@ class Manga:
             for x in self.chapterlinks:
                 try:
                     onlinechapter = int(x.split('/')[-1])
-                    onlinechapter = "".join(re.findall("[a-zA-Z]+", onlinechapter))
                 except:
-                    onlinechapter = float(x.split('/')[-1])
-                    onlinechapter = "".join(re.findall("[a-zA-Z]+", onlinechapter))
+                    onlinechapter = x.split('/')[-1]
             #check last downloaded chapter if complete incase internet/power interuption
-                if onlinechapter>=lastdownloaded:
-                    gaps+=1
-                else:
-                    break
+                try:
+                    if onlinechapter>=lastdownloaded:
+                        gaps+=1
+                    else:
+                        break
+                except:
+                    continue
             return gaps

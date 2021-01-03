@@ -46,7 +46,10 @@ for lines in data.split('\n'):
         continue
 
 for x in range(len(mangalist['manga'])):
-    Downloader().downloadLinks(mangalist['links'][x])
+    try:
+        Downloader().downloadLinks(mangalist['links'][x])
+    except:
+        continue
 
 #Reseting MangaTitle - Latest Chapter - Number of Chapters to download back to 1 into the watchlist.txt upon completion of downloads
 counter = 0

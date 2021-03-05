@@ -7,6 +7,11 @@ import re
 import time
 import datetime
 
+'''
+This script will only monitor homepage for latest chapters for the titles in watchlist.txt
+'''
+
+#program will keep running unless manually stopped
 while True:
     #reads watchlist.txt to see what manga to download
     path = os.path.relpath('watchlist.txt')
@@ -49,9 +54,11 @@ while True:
     for x in mangaupdates:
         title = x.get('title')
         link = x.get('href')
+        #checks all available titles in homepage with the titles gathered in watchlist.txt
         if link.lower() in mangalist['mangalink']:
             print(f'Found Manga Update of {title}')
             striptitle = link.split('.com/')[1].replace('-',' ')
+            #adds the title to the download queue
             todownload['manga'].append(striptitle)
             numupdates+=1
 
@@ -62,6 +69,6 @@ while True:
             todownload['chapterlinks'].append(manga1.getchapterlinks('1'))
         for x in range(len(todownload['manga'])):
             Downloader().downloadLinks(todownload['chapterlinks'][x])
-
-    print(f'{datetime.datetime.now()}')
+            
+    #calls the script again in 10mins 
     time.sleep(600)

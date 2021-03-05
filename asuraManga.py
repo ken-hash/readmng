@@ -3,6 +3,10 @@ from bs4 import BeautifulSoup
 import os
 import re
 
+'''
+Scrapes all manga in asurascans website
+
+'''
 #class Manga to gather information about argument Manga title contains information about chapterlinks, lastest chapter of the manga
 class Manga:
 

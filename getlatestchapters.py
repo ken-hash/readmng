@@ -4,6 +4,11 @@ from manga import Manga
 from downloadimg import Downloader
 import re
 
+
+'''
+This script will attempt to get all latest chapters of the titles in
+watchlist.txt
+'''
 #reads watchlist.txt to see what manga to download
 path = os.path.relpath('watchlist.txt')
 

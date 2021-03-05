@@ -13,6 +13,7 @@ class Manga:
 
 #scrapes all chapters listed in website lastest chapter being first item and first chapter being the last item
         if not self.chapterlinks:
+            #useless if
             data = urllib3.PoolManager().request('Get',self.url).data
             soup = BeautifulSoup(data,'lxml')
             self.numchapters = 1
@@ -22,7 +23,6 @@ class Manga:
                     self.chapterlinks.append(x.get('href'))
             except:
                 print('Invalid title/url. Please see listTitles.txt for titles to use')
-                return
 
 #returns latest chapter number
     def latestchapter(self):
@@ -60,6 +60,12 @@ class Manga:
         return newlinks
 
     def getgaps(self):
+        '''
+        Checks if theres any gap from last retrieved chapter from the latest chapter 
+        e.g.
+        Latest chapter is 10 while last obtained chapter was 5 then instead of just downloading the latest chapter it will
+        set the chapters to be downloaded to 5 and obtain chapter 6 7 8 9 10.
+        '''
         path = os.path.join(os.path.realpath('downloads'),self.title)
         #download only the latest chapter if directory doesnt exist
         if not os.path.isdir(path):
@@ -84,7 +90,7 @@ class Manga:
                     onlinechapter = int(x.split('/')[-1])
                 except:
                     onlinechapter = x.split('/')[-1]
-            #check last downloaded chapter if complete incase internet/power interuption
+            #will always attempt to download latest chapter to check if has downloaded all images for that chapter in case of manually stopping the script or internet disruptions
                 try:
                     if onlinechapter>=lastdownloaded:
                         gaps+=1

@@ -20,7 +20,10 @@ class Downloader:
                 path ='downloads'+ '//' +link.split('/')[-3] + '//' +link.split('/')[-2]
                 # if path doesn't exist, make that path dir
                 if not os.path.isdir(path):
-                    os.makedirs(path)
+                    try:
+                        os.makedirs(path)
+                    except:
+                        continue
                 response = requests.get(link)
                 soup = BeautifulSoup(response.text,'lxml')
                 #parsing imagelinks from the link provided

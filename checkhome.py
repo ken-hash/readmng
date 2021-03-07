@@ -11,38 +11,39 @@ import datetime
 This script will only monitor homepage for latest chapters for the titles in watchlist.txt
 '''
 
+#reads watchlist.txt to see what manga to download
+path = os.path.relpath('watchlist.txt')
+
+file = open(path,'r', encoding='utf-8')
+data = file.read()
+file.close()
+
+mangalist = {
+    'manga':[],
+    'mangalink':[],
+}
+
+todownload = {
+    'manga':[],
+    'chapterlinks':[],
+}
+
+# if an entry in watchlist starts has # it wouldnt be included
+for lines in data.split('\n'):
+    if re.search('#',lines):
+        newwrite+=lines+'\n'
+        continue
+    splits = lines.split('-')
+    title = splits[0].strip()
+    urlmanga = "https://www.readmng.com/"+ title.lower().replace(' ','-')
+    mangalist['mangalink'].append(urlmanga)
+    mangalist['manga'].append(title)
+
 #program will keep running unless manually stopped
+
 while True:
-    #reads watchlist.txt to see what manga to download
-    path = os.path.relpath('watchlist.txt')
-
-    file = open(path,'r', encoding='utf-8')
-    data = file.read()
-    file.close()
-
-    mangalist = {
-        'manga':[],
-        'mangalink':[],
-    }
-
-    todownload = {
-        'manga':[],
-        'chapterlinks':[],
-    }
-
     newwrite = ''
     numupdates = 0
-
-    # if an entry in watchlist starts has # it wouldnt be included
-    for lines in data.split('\n'):
-        if re.search('#',lines):
-            newwrite+=lines+'\n'
-            continue
-        splits = lines.split('-')
-        title = splits[0].strip()
-        urlmanga = "https://www.readmng.com/"+ title.lower().replace(' ','-')
-        mangalist['mangalink'].append(urlmanga)
-        mangalist['manga'].append(title)
 
     #checks homepage if theres an update of any manga in the watchlist
     url = "https://www.readmng.com/"

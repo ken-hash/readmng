@@ -28,6 +28,7 @@ todownload = {
     'chapterlinks':[],
 }
 
+newwrite = ''
 # if an entry in watchlist starts has # it wouldnt be included
 for lines in data.split('\n'):
     if re.search('#',lines):
@@ -42,7 +43,6 @@ for lines in data.split('\n'):
 #program will keep running unless manually stopped
 
 while True:
-    newwrite = ''
     numupdates = 0
 
     #checks homepage if theres an update of any manga in the watchlist

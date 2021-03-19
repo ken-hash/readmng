@@ -13,7 +13,7 @@ class Manga:
     def __init__(self, title):
         self.title=title
         self.chapterlinks = []
-        self.url = "https://asurascans.com/"+self.title
+        self.url = "https://asurascans.com/comics/"+self.title
 #scrapes all chapters listed in website lastest chapter being first item and first chapter being the last item
         if not self.chapterlinks:
             data = urllib3.PoolManager().request('Get',self.url).data

@@ -8,7 +8,7 @@ import requests
 from asuradownloadimg import Downloader
 
 homeUrl = "https://asurascans.com/"
-mangalistUrl = "https://asurascans.com/manga/"
+mangalistUrl = "https://asurascans.com/comics/"
 
 mangalist = {
     'manga':[],
@@ -43,6 +43,8 @@ for x in mangalist['manga']:
         mangalist['links'].append(manga1.getchapterlinks('All'))
     except:
         continue
+
+print(mangalist)
 
 for x in range(len(mangalist['manga'])):
     Downloader().downloadLinks(mangalist['links'][x])

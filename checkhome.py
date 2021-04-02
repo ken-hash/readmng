@@ -21,6 +21,7 @@ file.close()
 mangalist = {
     'manga':[],
     'mangalink':[],
+    'latestchapter':[]
 }
 
 todownload = {
@@ -28,17 +29,16 @@ todownload = {
     'chapterlinks':[],
 }
 
-newwrite = ''
 # if an entry in watchlist starts has # it wouldnt be included
-for lines in data.split('\n'):
-    if re.search('#',lines):
-        newwrite+=lines+'\n'
+for line in data.split('\n'):
+    if re.search('#',line) or line=='\n' or line=='':
         continue
-    splits = lines.split('-')
+    splits = line.split('-')
     title = splits[0].strip()
     urlmanga = "https://www.readmng.com/"+ title.lower().replace(' ','-')
     mangalist['mangalink'].append(urlmanga)
-    mangalist['manga'].append(title)
+    mangalist['manga'].append(title.lower())
+    mangalist['latestchapter'].append(splits[1].strip())
 
 #program will keep running unless manually stopped
 
@@ -49,19 +49,30 @@ while True:
     url = "https://www.readmng.com/"
     html = requests.get(url).text
     soup = BeautifulSoup(html,'lxml')
-    mangaupdates = soup.findAll('a',{'class':'manga_info'})
+    mangaupdates = soup.findAll('dl')
 
     #creates new list for updated manga
     for x in mangaupdates:
-        title = x.get('title')
-        link = x.get('href')
+        y = x.find('a',{'class':'manga_info'})
+        if y is None:
+            continue
+        link = y.get('href')
+        title = link.split('/')[-1].replace('-',' ')
+        latestchapter = x.find('dd').text.split('-')[-1].strip()
         #checks all available titles in homepage with the titles gathered in watchlist.txt
         if link.lower() in mangalist['mangalink']:
             print(f'Found Manga Update of {title}')
             striptitle = link.split('.com/')[1].replace('-',' ')
             #adds the title to the download queue
-            todownload['manga'].append(striptitle)
-            numupdates+=1
+            try:
+                indexManga = mangalist['manga'].index(title)
+            except:
+                indexManga = 0
+            if(latestchapter != mangalist['latestchapter'][indexManga]):
+                todownload['manga'].append(striptitle)
+                numupdates+=1
+            else:
+                continue
 
     #download only the updated manga titles
     if numupdates >=1:

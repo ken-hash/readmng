@@ -1,7 +1,6 @@
 import os 
 import requests
 from bs4 import BeautifulSoup
-from manga import Manga
 from downloadimg import Downloader
 import re
 import time
@@ -12,7 +11,7 @@ This script will only monitor homepage for latest chapters for the titles in wat
 '''
 
 #reads watchlist.txt to see what manga to download
-path = os.path.relpath('watchlist.txt')
+path = os.path.relpath('watchlist2.txt')
 
 file = open(path,'r', encoding='utf-8')
 data = file.read()
@@ -29,22 +28,24 @@ todownload = {
     'chapterlinks':[],
 }
 
+newwrite = ''
+
 # if an entry in watchlist starts has # it wouldnt be included
 for line in data.split('\n'):
     if re.search('#',line) or line=='\n' or line=='':
+        newwrite+=line+'\n'
         continue
-    splits = line.split('-')
-    title = splits[0].strip()
-    urlmanga = "https://www.readmng.com/"+ title.lower().replace(' ','-')
+    splits = line.split(' -')
+    title = splits[0].strip().lower().replace(' ','-')
+    numChapters = splits[-1].strip()
+    urlmanga = "https://www.readmng.com/"+ title
     mangalist['mangalink'].append(urlmanga)
-    mangalist['manga'].append(title.lower())
+    mangalist['manga'].append(title)
     mangalist['latestchapter'].append(splits[1].strip())
 
 #program will keep running unless manually stopped
 
 while True:
-    numupdates = 0
-
     #checks homepage if theres an update of any manga in the watchlist
     url = "https://www.readmng.com/"
     html = requests.get(url).text
@@ -57,30 +58,34 @@ while True:
         if y is None:
             continue
         link = y.get('href')
-        title = link.split('/')[-1].replace('-',' ')
-        latestchapter = x.find('dd').text.split('-')[-1].strip()
+        title = link.split('/')[-1]
+        try:
+            latestchapter = x.find('dd').text.split('-')[-1].strip()
+        except:
+            continue
         #checks all available titles in homepage with the titles gathered in watchlist.txt
-        if link.lower() in mangalist['mangalink']:
-            print(f'Found Manga Update of {title}')
-            striptitle = link.split('.com/')[1].replace('-',' ')
-            #adds the title to the download queue
-            try:
-                indexManga = mangalist['manga'].index(title)
-            except:
-                indexManga = 0
-            if(latestchapter != mangalist['latestchapter'][indexManga]):
-                todownload['manga'].append(striptitle)
-                numupdates+=1
-            else:
-                continue
+        if link.lower() not in mangalist['mangalink'] or mangalist['latestchapter'][mangalist['manga'].index(title.lower())] == latestchapter:
+            continue
+        print(f'Found Manga Update of {title}')
+        #adds the title to the download queue
+        todownload['manga'].append(title)
+        mangalist['latestchapter'][mangalist['manga'].index(title.lower())] = latestchapter
+        chapterLink = f"{x.find('dd').find('a',{'href':True}).get('href')}/all-pages"
+        todownload['chapterlinks'].append(chapterLink)
 
-    #download only the updated manga titles
-    if numupdates >=1:
-        for manga in todownload['manga']:
-            manga1 = Manga(manga)
-            todownload['chapterlinks'].append(manga1.getchapterlinks('1'))
-        for x in range(len(todownload['manga'])):
-            Downloader().downloadLinks(todownload['chapterlinks'][x])
-            
+    if len(todownload['manga'])>0:
+        #download only the updated manga titles
+        Downloader().downloadLinks(todownload['chapterlinks'])
+                
+        counter = 0
+        newwrite = ''
+        for lines in mangalist['manga']:
+            if counter<=len(mangalist['manga'])-1:
+                newwrite+=lines+ " - " +str(mangalist['latestchapter'][counter]) + " - " + '1' + "\n"
+                counter+=1
+
+        file = open(path, 'w', encoding='utf-8')
+        file.write(newwrite[:-1])
+        file.close()
     #calls the script again in 10mins 
     time.sleep(600)

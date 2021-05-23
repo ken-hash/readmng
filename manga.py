@@ -2,100 +2,78 @@ import urllib3
 from bs4 import BeautifulSoup
 import os
 import re
+import random
 
-#class Manga to gather information about argument Manga title contains information about chapterlinks, lastest chapter of the manga
 class Manga:
+    def __init__(self, title, numChapters):
+        self.title = title.replace(' ','-')
 
-    def __init__(self, title):
-        self.title = title.lower().replace(' ','-')
-        self.chapterlinks = []
-        self.url = "https://www.readmng.com/"+self.title
-
-#scrapes all chapters listed in website lastest chapter being first item and first chapter being the last item
-        if not self.chapterlinks:
-            #useless if
-            data = urllib3.PoolManager().request('Get',self.url).data
-            soup = BeautifulSoup(data,'lxml')
-            self.numchapters = 1
-            try:
-                tempchapterlinks = soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url,re.IGNORECASE)})
-                for x in tempchapterlinks:
-                    self.chapterlinks.append(x.get('href'))
-            except:
-                print('Invalid title/url. Please see listTitles.txt for titles to use')
-
-#returns latest chapter number
-    def latestchapter(self):
-        return self.chapterlinks[0].split('/')[-1]
-
-    def geturl(self):
-        return self.url
-
-    def latestchapterlink(self):
-        newlink = self.chapterlinks[0]+'/all-pages'
-        return newlink
-
-    def getallchapters(self):
-        return len(self.chapterlinks)
-
-#returns chapter links depending on how many chapters needed to be downloaded e.g. if set to 5, it will download latest 5 chapters
-    def getchapterlinks(self, num):
-        newlinks = []
-        #if set to all it will download all the available chapters
-        if num.lower() == 'all':
-            numchap = self.getallchapters()
-            print('Attempting to download all chapters of',self.title)
+        if numChapters == "" or numChapters is None:
+            self.numChapters = 1
         else:
-            #downloads gaprelease or desired number of chapterdownloads. will always attempt to download/check last downloaded chapter for discrepancies
-            gap = self.getgaps()
-            if gap<int(num):
-                numchap=int(num)
-            else:
-                numchap=gap
-            if(int(num)>1):
-                print('Found',str(numchap),'chapters of',self.title,'to download')
-        #will always attempt to check if latest chapter is downloaded properly
-        for x in self.chapterlinks[0:numchap]:
-            newlinks.append(x+'/all-pages')
-        return newlinks
+            self.numChapters = numChapters
+        self.url = f"https://www.readmng.com/{self.title}"
+        self.chapterNumLinks = []
+        self.chapterlinks = []
 
-    def getgaps(self):
-        '''
-        Checks if theres any gap from last retrieved chapter from the latest chapter 
-        e.g.
-        Latest chapter is 10 while last obtained chapter was 5 then instead of just downloading the latest chapter it will
-        set the chapters to be downloaded to 5 and obtain chapter 6 7 8 9 10.
-        '''
+        data = urllib3.PoolManager().request('Get',self.url).data
+        self.soup = BeautifulSoup(data,'lxml')
+
+        if self.soup.html.body.find('div',{'id':'chapters_container'}) is None:
+            print('Invalid title/url. Please see listTitles.txt for titles to use')
+            return
+        self.getAllAvailableChapters()
+           
+
+    def getGaps(self):
         path = os.path.join(os.path.realpath('downloads'),self.title)
         #download only the latest chapter if directory doesnt exist
         if not os.path.isdir(path):
             print('New Manga found:',self.title)
-            return 1
+            try:
+                temp =  1 + int(self.numChapters)-1
+            except:
+                temp = 1
+            return temp
+        elif self.numChapters != "1":
+            return int(self.numChapters)
         else:
             #list all chapters downloaded in the folder
             listitems = os.listdir(path)
-            lastdownloaded = 0
-            #get last downloaded chapter number 
-            for x in listitems:
-                try:
-                    x = int(x)
-                except:
-                    continue
-                if x>lastdownloaded:
-                    lastdownloaded=x
-            gaps=0
-            #check how many chapter releases from last chapter downloaded
-            for x in self.chapterlinks:
-                try:
-                    onlinechapter = int(x.split('/')[-1])
-                except:
-                    onlinechapter = x.split('/')[-1]
-            #will always attempt to download latest chapter to check if has downloaded all images for that chapter in case of manually stopping the script or internet disruptions
-                try:
-                    if onlinechapter>=lastdownloaded:
-                        gaps+=1
-                    else:
-                        break
-                except:
-                    continue
-            return gaps
+            listitems.sort(key=lambda f: int(re.sub('\D', '', f)))
+            indexLatest = self.chapterNumLinks.index(listitems[-1])
+            return len(self.chapterNumLinks) -  len(self.chapterNumLinks)-indexLatest
+
+    def getAllAvailableChapters(self):
+        tempchapterlinks = self.soup.html.body.find('div',{'id':'chapters_container'}).findAll('a',{'href':re.compile(self.url,re.IGNORECASE)})
+        for x in tempchapterlinks:
+            chapterLinks = x.get('href')
+            numChapterLinks = chapterLinks.split('/')[-1]
+            self.chapterlinks.append(f"{chapterLinks}/all-pages")
+            self.chapterNumLinks.append(numChapterLinks)
+
+    def getSelectedLinks(self):
+        selectedLinks = []
+        if len(self.chapterlinks)<25:
+            return self.chapterlinks
+        else:
+            for x in range(5):
+                selectedLinks.append(self.chapterlinks[x])
+            sampleList = random.sample(range(len(self.chapterlinks)-10), 15)
+            for x in range(15):
+                selectedLinks.append(self.chapterlinks[sampleList[x]+5])
+            for x in range(5):
+                selectedLinks.append(self.chapterlinks[x-5])
+            return selectedLinks
+
+    def getChaptersToDownload(self):
+        if self.numChapters.strip().lower() == "all":
+            return self.chapterlinks
+        elif self.numChapters.strip().lower() == "minupdate":
+            return self.getSelectedLinks()
+        else:
+            gaps = self.getGaps()
+            return self.chapterlinks[-1:len(self.chapterlinks-gaps)]
+
+
+

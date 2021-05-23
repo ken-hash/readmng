@@ -17,7 +17,7 @@ class Downloader:
         else:
             #downloading in reverse order so latest chapter will be downloaded last
             for link in links[::-1]:
-                path ='downloads'+ '//' +link.split('/')[-3] + '//' +link.split('/')[-2]
+                path = f"downloads//{link.split('/')[-3]}//{link.split('/')[-2]}"
                 # if path doesn't exist, make that path dir
                 if not os.path.isdir(path):
                     try:

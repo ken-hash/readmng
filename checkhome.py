@@ -1,91 +1,80 @@
-import os 
-import requests
-from bs4 import BeautifulSoup
 from downloadimg import Downloader
-import re
+from read_mng import ReadMng, ReadMangaSite
 import time
-import datetime
+from sqlsql import MySQLClass
+from random import randint
+import os
 
-'''
-This script will only monitor homepage for latest chapters for the titles in watchlist.txt
-'''
-
-#reads watchlist.txt to see what manga to download
-path = os.path.relpath('watchlist2.txt')
-
-file = open(path,'r', encoding='utf-8')
-data = file.read()
-file.close()
-
-mangalist = {
-    'manga':[],
-    'mangalink':[],
-    'latestchapter':[]
-}
-
-todownload = {
-    'manga':[],
-    'chapterlinks':[],
-}
-
-newwrite = ''
-
-# if an entry in watchlist starts has # it wouldnt be included
-for line in data.split('\n'):
-    if re.search('#',line) or line=='\n' or line=='':
-        newwrite+=line+'\n'
-        continue
-    splits = line.split(' -')
-    title = splits[0].strip().lower().replace(' ','-')
-    numChapters = splits[-1].strip()
-    urlmanga = "https://www.readmng.com/"+ title
-    mangalist['mangalink'].append(urlmanga)
-    mangalist['manga'].append(title)
-    mangalist['latestchapter'].append(splits[1].strip())
-
-#program will keep running unless manually stopped
-
+sql = MySQLClass()
+mangaLatest = {}
+downloader = Downloader(sql,'hide')
+downloaded = {'chapterCounter':0}
 while True:
-    #checks homepage if theres an update of any manga in the watchlist
-    url = "https://www.readmng.com/"
-    html = requests.get(url).text
-    soup = BeautifulSoup(html,'lxml')
-    mangaupdates = soup.findAll('dl')
+    try:
+        os.system('clear')
+        print('Checking for new chapters...')
+        print(f'Downloaded:\nManga:{len(downloaded.keys())-1}\nChaptersDownload:{downloaded["chapterCounter"]}')
+        if 'error' in downloaded:
+            print(f'Errors: {downloaded["error"]}')
+        mangaDict = {}
+        #if a new manga get added then attempt to sync up first
+        sqlList = sql.getAllMangaList('ExtraInformation = \',\'')
+        mangaToSync = []
+        if len(sqlList)==0:
+            #else check all recent manga available in home page 
+            sqlList = sql.getAllMangaList()
+            availableManga = ReadMangaSite().getHomePageAvailableManga()
+            mangaSQL = []
+            #map all manga in sql to list
+            for elem in sqlList:
+                mangaSQL.append(elem['MangaTitle'])
+            for manga in availableManga:
+                #if manga is recently updated then sync
+                if manga in mangaSQL:
+                    mangaToSync.append(manga)
+        else:
+            for elem in sqlList:
+                mangaToSync.append(elem['MangaTitle'])
 
-    #creates new list for updated manga
-    for x in mangaupdates:
-        y = x.find('a',{'class':'manga_info'})
-        if y is None:
-            continue
-        link = y.get('href')
-        title = link.split('/')[-1]
-        try:
-            latestchapter = x.find('dd').text.split('-')[-1].strip()
-        except:
-            continue
-        #checks all available titles in homepage with the titles gathered in watchlist.txt
-        if link.lower() not in mangalist['mangalink'] or mangalist['latestchapter'][mangalist['manga'].index(title.lower())] == latestchapter:
-            continue
-        print(f'Found Manga Update of {title}')
-        #adds the title to the download queue
-        todownload['manga'].append(title)
-        mangalist['latestchapter'][mangalist['manga'].index(title.lower())] = latestchapter
-        chapterLink = f"{x.find('dd').find('a',{'href':True}).get('href')}/all-pages"
-        todownload['chapterlinks'].append(chapterLink)
+        #sync
+        for manga in mangaToSync:
+            manga1 = ReadMng(manga)
+            latestchapter = manga1.chapterNumLinks[0]
+            #skip if already downloaded
+            if manga in mangaLatest and 'latestChapter' in mangaLatest[manga] and mangaLatest[manga]['latestChapter']==latestchapter:
+                continue
+            else:
+                if manga not in mangaLatest:
+                    mangaLatest[manga]={}
+                mangaLatest[manga]['latestChapter']=latestchapter
+            sql.updateValue(manga,latestchapter,'no')
+            mangaDict[manga]={'Chapters':[], 'latestchapter':latestchapter}
+            mangaDict[manga]['Chapters'] = manga1.getChaptersToDownload()
+            print('Manga: \'',manga,'\' Latest Chapter is',latestchapter)
+            if mangaDict[manga]['Chapters'] is not None and len(mangaDict[manga]['Chapters'])>0:
+                if manga not in downloaded:
+                    downloaded[manga]={'chapters':len(mangaDict[manga]['Chapters'])}
+                else:
+                    downloaded[manga]['chapters']+=len(mangaDict[manga]['Chapters'])
+                downloaded['chapterCounter']+=len(mangaDict[manga]['Chapters'])
+                print(f'New chapter found for {manga}')
+            
+        for manga in mangaDict:
+            if mangaDict[manga]['Chapters'] is not None:
+                try:
+                    for chapter in mangaDict[manga]['Chapters']:
+                        downloader.downloadLinks(chapter['ImageList'])
+                except Exception as e:
+                    print(e)
+                    continue
+            #calls the script again
 
-    if len(todownload['manga'])>0:
-        #download only the updated manga titles
-        Downloader().downloadLinks(todownload['chapterlinks'])
-                
-        counter = 0
-        newwrite = ''
-        for lines in mangalist['manga']:
-            if counter<=len(mangalist['manga'])-1:
-                newwrite+=lines+ " - " +str(mangalist['latestchapter'][counter]) + " - " + '1' + "\n"
-                counter+=1
-
-        file = open(path, 'w', encoding='utf-8')
-        file.write(newwrite[:-1])
-        file.close()
+    except Exception as e:
+        if 'error' not in downloaded:
+            downloaded['error'] = e
+        else:
+            downloaded['error'] += f'\n{e}'
+        print(e)
+        time.sleep(500)
     #calls the script again in 10mins 
-    time.sleep(600)
+    time.sleep(600+randint(60,60*5))

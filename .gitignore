@@ -129,4 +129,10 @@ dmypy.json
 .pyre/
 
 .vscode/settings.json
-checkhomePi.py
+donotdownload.json
+
+Good/
+manga/
+Etc/
+Books/
+infos/

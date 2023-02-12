@@ -36,7 +36,7 @@ class ReadMng:
             return None
         return True
 
-    #grabs all chapters in readmanga 
+    #grabs all chapters available for the manga in readmng 
     def getAllAvailableChapters(self):
         chapterBoxes = self.soup.html.body.findAll('div',{'class':'cardFlex checkBoxFlex'})
         for chapterBox in chapterBoxes:
@@ -61,6 +61,7 @@ class ReadMng:
         if len(notchecked)==0:
             return 
         else:
+            #arrange the chapters not downloaded backwards so older chapter gets downloaded first
             notchecked.reverse()
             for x in range(len(notchecked)):
                 chapterDict = {}
@@ -69,13 +70,15 @@ class ReadMng:
                 chapterDict['ImageList'] = []
                 path = os.path.join(self.downloadPath,self.title,notchecked[x])
                 for match in imagesMatch:
-                            link = match[0].replace('\\/','/')
-                            if len(re.findall(r'.jp.?g$|.pn.?g$|.webp$',link, re.IGNORECASE))>0:
-                                dlObject = self.downloadFactory(path, link)
-                            chapterDict['ImageList'].append(dlObject)
+                    #append download objects for each image for every chapter
+                    link = match[0].replace('\\/','/')
+                    if len(re.findall(r'.jp.?g$|.pn.?g$|.webp$',link, re.IGNORECASE))>0:
+                        dlObject = self.downloadFactory(path, link)
+                    chapterDict['ImageList'].append(dlObject)
                 selectedLinks.append(chapterDict)
         return selectedLinks
 
+    #get all images founded in the manga page
     def getImageLinks(self, htmlLink):
         response = requests.get(htmlLink)
         imagesMatch =  re.findall(r'(https:.*?www\.funmanga\.com.*?\.(jp.?g|pn.?g|webp))', response.text, re.MULTILINE)
@@ -83,6 +86,8 @@ class ReadMng:
             return None
         return imagesMatch
 
+    #get all nondownloaded chapters based on title
+    #if manga title isnt in database then insert
     def getChaptersToDownload(self):
         sql = MySQLClass()
         if sql.doesExist(self.title):
@@ -92,6 +97,7 @@ class ReadMng:
             chaptersChecked = sql.getExtraInformation(self.title) 
         return self.sqlLinks(chaptersChecked)
 
+    #creates download object from path and image url
     def downloadFactory(self, path, url):
             dlObject = DownloadObject()
             if os.name == 'nt':
@@ -115,6 +121,7 @@ class ReadMangaSite:
     def __init__(self):
         pass
 
+    #returns all latest manga found in homepage
     def getHomePageAvailableManga(self):
         url = "https://www.readmng.com"
         html = requests.get(url).text

@@ -31,7 +31,7 @@ class Downloader:
         self.doNotDownload = donotdownload()
         return True
 
-    #download function needing list containing links to be downloaded
+    #downloads list of download objects
     def downloadLinks(self, imageList):
         if self.validateLinks(imageList) is True:
             title = None
@@ -60,16 +60,19 @@ class Downloader:
                             executor.submit(self.download, dlObject)
                     except Exception as e:
                         print(e)
+            #if download is successful then post to mangareader db
             if self.checkDownloadedItems(chapterPath, title, chapternum) is True:
                 payload = ','.join(images)
                 self.req.createPayload(title,chapternum,payload)
                 req = self.req.sendRequest()
+                #if show error if the chapter and downloaded objects are already in db
                 if req.status_code not in [200,201]:
                     print(f'Error adding: {title} : {chapternum}')
                     print(f'{req.status_code}:{req.text}')
                 elif req.status_code == 200:
                     print(f'Modified: {req.text}')
 
+    #update manga db when the download has atleast one image downloaded
     def checkDownloadedItems(self, path, title, chapterNum):
         if self.checkItems(path):
             if self.options == "show":
@@ -127,17 +130,8 @@ class Downloader:
                 return False
         return True
 
-    def getImageLinks(self, htmlLink):
-        response = requests.get(htmlLink)
-        imagesMatch =  re.findall(r'(https:.*?www\.funmanga\.com.*?\.(jp.?g|pn.?g|webp))', response.text, re.MULTILINE)
-        if imagesMatch is None or len(imagesMatch) == 0:
-            return None
-        return imagesMatch
-
+    #check if downloaded folder has alteast one downloaded image
     def checkItems(self, path):
-        """
-        Checks if the items in the folder `pathname` are all downloaded
-        """
         hasAllFiles = False
         if not os.path.isdir(path):
             return False
@@ -164,25 +158,6 @@ class Downloader:
                         progress.update(len(data))
         except Exception as e:
             print(e)
-
-    def downloadFactory(self, path, url):
-        dlObject = DownloadObject()
-        if os.name == 'nt':
-            dlObject.title = path.split('\\')[-2]
-            dlObject.chapterNum = path.split('\\')[-1]
-            dlObject.fileId = url.split('/')[-1]
-            dlObject.fullPath = os.path.join(path, url.split("/")[-1])
-        else:
-            dlObject.title = path.split('/')[-2]
-            dlObject.chapterNum = path.split('/')[-1]
-            dlObject.fileId = url.split('/')[-1]
-            dlObject.fullPath = os.path.join(path, url.split("/")[-1])
-        #save webp into jpg files
-        if len(re.findall(r'webp',dlObject.fullPath))>0:
-            temp = re.sub('\.(webp|jpeg)','.jpg',dlObject.fullPath)
-            dlObject.fullPath = temp
-        dlObject.url = url
-        return dlObject
 
 class DownloadObject:
     def __init__(self):

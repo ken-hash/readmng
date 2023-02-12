@@ -5,6 +5,11 @@ from sqlsql import MySQLClass
 from random import randint
 import os
 
+'''
+script to run on background that refreshes readmng
+and download latest chapters 
+'''
+
 sql = MySQLClass()
 mangaLatest = {}
 downloader = Downloader(sql,'hide')
@@ -29,7 +34,7 @@ while True:
             for elem in sqlList:
                 mangaSQL.append(elem['MangaTitle'])
             for manga in availableManga:
-                #if manga is recently updated then sync
+                #if manga that belongs to watch list is recently updated then sync
                 if manga in mangaSQL:
                     mangaToSync.append(manga)
         else:
@@ -47,11 +52,15 @@ while True:
                 if manga not in mangaLatest:
                     mangaLatest[manga]={}
                 mangaLatest[manga]['latestChapter']=latestchapter
+            #update latest chapter to new value
             sql.updateValue(manga,latestchapter,'no')
             mangaDict[manga]={'Chapters':[], 'latestchapter':latestchapter}
             mangaDict[manga]['Chapters'] = manga1.getChaptersToDownload()
             print('Manga: \'',manga,'\' Latest Chapter is',latestchapter)
+
+            #if the new chapter has already been downloaded or no new chapters then skip
             if mangaDict[manga]['Chapters'] is not None and len(mangaDict[manga]['Chapters'])>0:
+                #increase num chapter downloaded 
                 if manga not in downloaded:
                     downloaded[manga]={'chapters':len(mangaDict[manga]['Chapters'])}
                 else:

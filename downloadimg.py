@@ -12,12 +12,14 @@ class Downloader:
         self.sql = sql
         if os.name == 'nt':
             self.downloadPath =  os.path.join("\\\\192.168.50.11","Public-Manga","downloads")
+            self.path_regex = re.compile(r'^(?:(?:[a-zA-Z]:|\\\\[\w\-.]+\\[\w.$\-+!()\[\]]+)(\\|\\(?:[^\\/:*?"<>|\r\n]+))+)$')
         else:
+            self.path_regex = re.compile(r'^(/[\w\-\.]+)+/?$')
             self.downloadPath = os.path.join('/','mnt','MangaPi','downloads')
         self.options = options
         self.req = MangaRequests()
         self.sort = sort.Sort()
-        self.path_regex = re.compile(r'^(?:(?:[a-zA-Z]:|\\\\[\w\-.]+\\[\w.$\-+!()\[\]]+)(\\|\\(?:[^\\/:*?"<>|\r\n]+))+)$')
+
 
     def validateLinks(self, links):
         if links is None:
@@ -108,12 +110,9 @@ class Downloader:
 
     def checkChapterIsValid(self, title, chapterNum):
         noList = self.sql.getChaptersExcluded(title)
-        if chapterNum in noList:
+        if chapterNum in noList or len(re.findall(r',|:', chapterNum))>0:
+            self.sql.addChapterExcluded(title, chapterNum)
             return False
-        else:
-            if len(re.findall(r',|:', chapterNum))>0:
-                self.sql.addChapterExcluded(title, chapterNum)
-                return False
         return True
 
     #check if downloaded folder has alteast one downloaded image

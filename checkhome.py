@@ -49,8 +49,8 @@ while True:
             #update latest chapter to new value
             sql.updateValue(manga,latestchapter,'no')
             mangaDict[manga]={'Chapters':[], 'latestchapter':latestchapter}
-            mangaDict[manga]['Chapters'] = manga1.getChaptersToDownload()
             print('Manga: \'',manga,'\' Latest Chapter is',latestchapter)
+            mangaDict[manga]['Chapters'] = manga1.getChaptersToDownload()
     except Exception as e:
         print(e)
         time.sleep(500)

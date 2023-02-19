@@ -68,10 +68,10 @@ class MySQLClass:
         rowCountsql = "SELECT COUNT(1) FROM ExcludeManga WHERE MangaTitle = %s AND Chapter = %s"
         self.mycursor.execute(rowCountsql,(title,chapter,))
         res = self.mycursor.fetchone()
-        if res is None:
+        if res is None or res['COUNT(1)'] == 0:
             sql = "INSERT ExcludeManga(MangaTitle,Chapter) VALUES (%s,%s)"
             self.mycursor.execute(sql,(title,chapter,))
-            self.conn.comit()
+            self.conn.commit()
         self.disconnect()
 
     '''
@@ -132,20 +132,22 @@ class MySQLClass:
         self.conn.commit()
         self.disconnect()
 
-    def getDownloadQueue(self, limit=100):
+    def getDownloadQueue(self, limit=10):
         self.connect()
         rowCountsql = "SELECT COUNT(1) FROM DownloadQueue"
         self.mycursor.execute(rowCountsql,)
         res = self.mycursor.fetchone()
         if res is None:
             return None
-        rowCount = res['COUNT(1)']
-        if rowCount > limit:
-            sql = f"SELECT * FROM DownloadQueue ORDER BY ChapterNum ASC LIMIT {limit} "
-        else:
-            sql = "SELECT * FROM DownloadQueue ORDER BY ChapterNum ASC "
-        self.mycursor.execute(sql,limit)
-        queue = self.mycursor.fetchall()
+        #SELECT column_group, COUNT(*) as count FROM my_table GROUP BY column_group ORDER BY count DESC LIMIT 10
+        sqlTemp = f'SELECT ID, Title, ChapterNum, COUNT(1) as count FROM DownloadQueue GROUP BY Title, ChapterNum ORDER BY ID ASC LIMIT %s'
+        self.mycursor.execute(sqlTemp,(limit,))
+        queue = []
+        tempTable = self.mycursor.fetchall()
+        sql = f'SELECT * FROM DownloadQueue WHERE Title = %s AND ChapterNum = %s'
+        for group in tempTable:
+            self.mycursor.execute(sql,(group['Title'], group['ChapterNum'],))
+            queue += self.mycursor.fetchall()
         self.disconnect()
         return queue
 

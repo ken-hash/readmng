@@ -24,9 +24,9 @@ for manga in sqlList:
         #If theres the an invalid line e.g. title it will be discarded and wont be added back into watchlist
         latestchapter = manga1.chapterNumLinks[0]
         sql.updateValue(manga['MangaTitle'],latestchapter,'no')
+        print('Manga: \'',manga['MangaTitle'].strip(),'\' Latest Chapter is',latestchapter)
         mangaDict[manga['MangaTitle']]={'links':[], 'latestchapter':latestchapter}
         mangaDict[manga['MangaTitle']]['chapterList'] = manga1.getChaptersToDownload()
-        print('Manga: \'',manga['MangaTitle'].strip(),'\' Latest Chapter is',latestchapter)
     except Exception as e:
         print(e)
     

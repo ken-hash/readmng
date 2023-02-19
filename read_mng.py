@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 from sqlsql import MySQLClass
 import re
-from downloadimg import DownloadObject
+from download_model import DownloadObject
 import os
 
 class ReadMng:
@@ -15,6 +15,7 @@ class ReadMng:
             self.downloadPath =  os.path.join("\\\\192.168.50.11","Public-Manga","downloads")
         else:
             self.downloadPath = os.path.join('/','mnt','MangaPi','downloads')
+        self.sql = MySQLClass()
         self.getAllAvailableChapters()
 
     #validate parameters return None if title is invalid
@@ -63,19 +64,30 @@ class ReadMng:
         else:
             #arrange the chapters not downloaded backwards so older chapter gets downloaded first
             notchecked.reverse()
+            excludedChapters = self.sql.getChaptersExcluded(self.title)
+            batch = []
             for x in range(len(notchecked)):
+                if len(batch) >= 100:
+                    self.sql.insertDownloadQueue(batch)
+                    batch = []
+                if x in excludedChapters:
+                    continue
                 chapterDict = {}
                 chapterDict['link']= f"https://www.readmng.com/{self.title}/{notchecked[x]}/all-pages"
                 imagesMatch = self.getImageLinks(chapterDict['link'])
                 chapterDict['ImageList'] = []
                 path = os.path.join(self.downloadPath,self.title,notchecked[x])
+                if imagesMatch is None:
+                    continue
                 for match in imagesMatch:
                     #append download objects for each image for every chapter
                     link = match[0].replace('\\/','/')
                     if len(re.findall(r'.jp.?g$|.pn.?g$|.webp$',link, re.IGNORECASE))>0:
                         dlObject = self.downloadFactory(path, link)
                     chapterDict['ImageList'].append(dlObject)
+                    batch.append(dlObject)
                 selectedLinks.append(chapterDict)
+            self.sql.insertDownloadQueue(batch)
         return selectedLinks
 
     #get all images founded in the manga page
@@ -89,12 +101,11 @@ class ReadMng:
     #get all nondownloaded chapters based on title
     #if manga title isnt in database then insert
     def getChaptersToDownload(self):
-        sql = MySQLClass()
-        if sql.doesExist(self.title):
-            chaptersChecked = sql.getExtraInformation(self.title) 
+        if self.sql.doesExist(self.title):
+            chaptersChecked = self.sql.getExtraInformation(self.title) 
         else:
-            sql.insertValue(self.title,"",self.chapterNumLinks[0])
-            chaptersChecked = sql.getExtraInformation(self.title) 
+            self.sql.insertValue(self.title,"",self.chapterNumLinks[0])
+            chaptersChecked = self.sql.getExtraInformation(self.title) 
         return self.sqlLinks(chaptersChecked)
 
     #creates download object from path and image url
@@ -104,16 +115,14 @@ class ReadMng:
                 dlObject.title = path.split('\\')[-2]
                 dlObject.chapterNum = path.split('\\')[-1]
                 dlObject.fileId = url.split('/')[-1]
-                dlObject.fullPath = os.path.join(path, url.split("/")[-1])
             else:
                 dlObject.title = path.split('/')[-2]
                 dlObject.chapterNum = path.split('/')[-1]
                 dlObject.fileId = url.split('/')[-1]
-                dlObject.fullPath = os.path.join(path, url.split("/")[-1])
             #save webp into jpg files
-            if len(re.findall(r'webp',dlObject.fullPath))>0:
-                temp = re.sub('\.(webp|jpeg)','.jpg',dlObject.fullPath)
-                dlObject.fullPath = temp
+            if len(re.findall(r'webp',dlObject.fileId))>0:
+                temp = re.sub('\.(webp|jpeg)','.jpg',dlObject.fileId)
+                dlObject.fileId = temp
             dlObject.url = url
             return dlObject
 

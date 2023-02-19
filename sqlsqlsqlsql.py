@@ -1,30 +1,20 @@
-import os 
 from read_mng import ReadMng
-from downloadimg import Downloader
-import json
 from sqlsql import MySQLClass
+import sys
 from sort import Sort
 
 mangaDict = {}
 
 sql = MySQLClass()
 newwrite = ''
-downloader = Downloader(sql,'hide')
-if os.name == 'nt':
-    sqlList = [
-    #{'MangaTitle':'return-of-the-8th-class-magician'},
-    #{'MangaTitle':'tensei-shitara-slime-datta-ken'},
-    {'MangaTitle':'goblin-slayer'}
-    ]
-    '''
-    #sqlList = sql.getAllMangaList('MangaTitle REGEXP \'^[u-w]\'')
-    sqlList = sql.getAllMangaList('MangaTitle REGEXP \'^[a-r]\'')
-    #sqlList = sql.getAllMangaList('MangaTitle REGEXP \'^[t-z]\' ORDER BY MangaTitle DESC')
-    '''
-else:
-    #sqlList = sql.getAllMangaList()
-    sqlList = [{'MangaTitle':'hanging-out-with-a-gamer-girl'}]
-
+sqlList = []
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    if len(args) > 0:
+        for arg in args:
+            sqlList.append({'MangaTitle':arg})
+    else:
+        sqlList = sql.getAllMangaList()
 
 # if an entry in watchlist starts has # it wouldnt be included
 for manga in sqlList:
@@ -39,17 +29,5 @@ for manga in sqlList:
         print('Manga: \'',manga['MangaTitle'].strip(),'\' Latest Chapter is',latestchapter)
     except Exception as e:
         print(e)
-
-for manga in mangaDict:
-    if mangaDict[manga]['chapterList'] is not None:
-        try:
-            for chapter in mangaDict[manga]['chapterList']:
-                downloader.downloadLinks(chapter['ImageList'])
-        except Exception as e:
-            print(e)
-            continue
-summary = downloader.getSummary()
-obj = json.dumps(summary)
-print(json.dumps(obj, indent=3))
     
 Sort().main_sort()

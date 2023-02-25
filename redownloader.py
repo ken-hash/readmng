@@ -1,5 +1,6 @@
 import os
 import sys
+from read_mng import ReadMng
 from sqlsql import MySQLClass
 
 class Redownloader:
@@ -10,12 +11,18 @@ class Redownloader:
             self.downloadPath = os.path.join('/','mnt','MangaPi','downloads')
         self.baseFolder = self.downloadPath
         self.sql = MySQLClass()
+        self.mangaReDL = []
         if arg is not None:
             self.mangaFolder = os.path.join(self.baseFolder,arg)
             self.mangaFolders(self.mangaFolder)
         else:
             self.mangaFolder = self.baseFolder
             self.checkAllFolders()
+        if len(self.mangaReDL)>0:
+            for manga in self.mangaReDL:
+                manga1 = ReadMng(manga)
+                manga1.getChaptersToDownload()
+
 
     def checkAllFolders(self):
         for manga in os.listdir(self.mangaFolder):
@@ -45,6 +52,8 @@ class Redownloader:
             extraInfo = self.sql.getExtraInformation(title)
             newExtraInfo = extraInfo.replace(f',{chapter},',',')
             #useless as redownload would update lastupdated anyways
+            if title not in self.mangaReDL:
+                self.mangaReDL.append(title)
             self.sql.updateExtraInformation(title,newExtraInfo,'off')
                     
 
@@ -54,4 +63,5 @@ if __name__ == "__main__":
         reDL = Redownloader()
     for arg in args:
         reDL = Redownloader(arg)
+    
     print(reDL.mangaFolder)

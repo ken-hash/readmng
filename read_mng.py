@@ -22,7 +22,8 @@ class ReadMng:
     def validateItems(self, title):
         if title == None:
             return None
-        self.title = title
+        #bug when /title is a valid manga
+        self.title = title.replace('/','')
         self.url = f"https://www.readmng.com/{self.title}"
         if self.initWebScrape() is None:
             return None
@@ -66,17 +67,18 @@ class ReadMng:
             notchecked.reverse()
             excludedChapters = self.sql.getChaptersExcluded(self.title)
             batch = []
-            for x in range(len(notchecked)):
+            for chap in notchecked:
                 if len(batch) >= 100:
                     self.sql.insertDownloadQueue(batch)
                     batch = []
-                if x in excludedChapters:
+                if chap in excludedChapters:
                     continue
                 chapterDict = {}
-                chapterDict['link']= f"https://www.readmng.com/{self.title}/{notchecked[x]}/all-pages"
+                #scrape all images from the chapter link
+                chapterDict['link']= f"https://www.readmng.com/{self.title}/{chap}/all-pages"
                 imagesMatch = self.getImageLinks(chapterDict['link'])
                 chapterDict['ImageList'] = []
-                path = os.path.join(self.downloadPath,self.title,notchecked[x])
+                path = os.path.join(self.downloadPath,self.title,chap)
                 if imagesMatch is None:
                     continue
                 for match in imagesMatch:
@@ -110,21 +112,16 @@ class ReadMng:
 
     #creates download object from path and image url
     def downloadFactory(self, path, url):
-            dlObject = DownloadObject()
-            if os.name == 'nt':
-                dlObject.title = path.split('\\')[-2]
-                dlObject.chapterNum = path.split('\\')[-1]
-                dlObject.fileId = url.split('/')[-1]
-            else:
-                dlObject.title = path.split('/')[-2]
-                dlObject.chapterNum = path.split('/')[-1]
-                dlObject.fileId = url.split('/')[-1]
-            #save webp into jpg files
-            if len(re.findall(r'webp',dlObject.fileId))>0:
-                temp = re.sub('\.(webp|jpeg)','.jpg',dlObject.fileId)
-                dlObject.fileId = temp
-            dlObject.url = url
-            return dlObject
+        dlObject = DownloadObject()
+        dlObject.title =  os.path.basename(os.path.dirname(path))
+        dlObject.chapterNum = os.path.basename(path)
+        dlObject.fileId = url.split('/')[-1]
+        #save webp into jpg files
+        if len(re.findall(r'webp',dlObject.fileId))>0:
+            temp = re.sub('\.(webp|jpeg)','.jpg',dlObject.fileId)
+            dlObject.fileId = temp
+        dlObject.url = url
+        return dlObject
 
 class ReadMangaSite:
     def __init__(self):

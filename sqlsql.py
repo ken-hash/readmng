@@ -11,7 +11,7 @@ class MySQLClass:
         self.user = getenv("piUser")
         self.mydb = pooling.MySQLConnectionPool(user=self.user , password=self.password , port=3307,
                     host='192.168.50.10',
-                    database='kennSQL',pool_reset_session=True, pool_size=15,pool_name="piPool")
+                    database='kennSQL',pool_reset_session=False, pool_size=15,pool_name="piPool")
 
     '''
     Manga Points
@@ -34,10 +34,10 @@ class MySQLClass:
 
     def doesExist(self,manga):
         self.connect()
-        date = datetime.now().strftime('%Y-%M-%d')
-        sql = f"SELECT COUNT(1) FROM mangaDatabase WHERE mangaTitle = '{manga}'"
-        self.mycursor.execute(sql,)
-        if (self.mycursor.fetchone() is not None):
+        sql = "SELECT COUNT(1) FROM mangaDatabase WHERE mangaTitle = %s"
+        self.mycursor.execute(sql,(manga,))
+        res = self.mycursor.fetchone()
+        if res is not None and res['COUNT(1)']>0:
             self.disconnect()
             return True
         else:
@@ -93,8 +93,8 @@ class MySQLClass:
         if self.doesExist(title) is False:
             self.insertValue(title, 0, 0)
         self.connect()
-        sql = f"SELECT ExtraInformation FROM mangaDatabase WHERE MangaTitle = '{title}'"
-        self.mycursor.execute(sql,)
+        sql = "SELECT ExtraInformation FROM mangaDatabase WHERE MangaTitle = %s"
+        self.mycursor.execute(sql,(title,))
         extraInfo = self.mycursor.fetchone()
         self.disconnect()
         return extraInfo["ExtraInformation"]
@@ -111,8 +111,8 @@ class MySQLClass:
 
     def appendExtraInformation(self, title, extraInformation):
         self.connect()
-        sql = f"UPDATE mangaDatabase SET ExtraInformation = REPLACE(ExtraInformation,',,',',') WHERE MangaTitle = '{title}'"
-        self.mycursor.execute(sql,)
+        sql = "UPDATE mangaDatabase SET ExtraInformation = REPLACE(ExtraInformation,',,',',') WHERE MangaTitle = %s"
+        self.mycursor.execute(sql,(title,))
         self.conn.commit()
         sql = f"UPDATE mangaDatabase SET LastUpdated='{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}', ExtraInformation = CONCAT(ExtraInformation, '{extraInformation},') WHERE MangaTitle = '{title}'"
         self.mycursor.execute(sql,)
@@ -139,12 +139,11 @@ class MySQLClass:
         res = self.mycursor.fetchone()
         if res is None:
             return None
-        #SELECT column_group, COUNT(*) as count FROM my_table GROUP BY column_group ORDER BY count DESC LIMIT 10
         sqlTemp = f'SELECT ID, Title, ChapterNum, COUNT(1) as count FROM DownloadQueue GROUP BY Title, ChapterNum ORDER BY ID ASC LIMIT %s'
         self.mycursor.execute(sqlTemp,(limit,))
         queue = []
         tempTable = self.mycursor.fetchall()
-        sql = f'SELECT * FROM DownloadQueue WHERE Title = %s AND ChapterNum = %s'
+        sql = 'SELECT * FROM DownloadQueue WHERE Title = %s AND ChapterNum = %s'
         for group in tempTable:
             self.mycursor.execute(sql,(group['Title'], group['ChapterNum'],))
             queue += self.mycursor.fetchall()

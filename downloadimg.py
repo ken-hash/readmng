@@ -90,7 +90,10 @@ class Downloader:
                 else:
                     os.system('clear')
             print(f"Downloaded: {chapterNum:>5s} of {title+'.':<20}")
-            self.sql.appendExtraInformation(title, chapterNum)
+            if self.sql.doesExist(title, 'AsuraScans'):
+                self.sql.appendExtraInformation(title, chapterNum,'AsuraScans')
+            else:
+                self.sql.appendExtraInformation(title, chapterNum)
             return True
         else:
             print(f"Chapter {chapterNum:>5s} of {title+'.':<20} - Failed Download")

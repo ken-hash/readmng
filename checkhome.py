@@ -26,14 +26,14 @@ while True:
             mangaSQL = []
             #map all manga in sql to list
             for elem in sqlList:
-                mangaSQL.append(elem['MangaTitle'])
+                mangaSQL.append(elem['Title'])
             for manga in availableManga:
                 #if manga that belongs to watch list is recently updated then sync
                 if manga in mangaSQL:
                     mangaToSync.append(manga)
         else:
             for elem in sqlList:
-                mangaToSync.append(elem['MangaTitle'])
+                mangaToSync.append(elem['Title'])
 
         #sync
         for manga in mangaToSync:

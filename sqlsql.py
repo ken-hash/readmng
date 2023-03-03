@@ -11,7 +11,7 @@ class MySQLClass:
         self.user = getenv("piUser")
         self.mydb = pooling.MySQLConnectionPool(user=self.user , password=self.password , port=3307,
                     host='192.168.50.10',
-                    database='kennSQL',pool_reset_session=False, pool_size=15,pool_name="piPool")
+                    database='kennSQL',pool_reset_session=True, pool_size=15,pool_name="piPool")
 
     '''
     Manga Points
@@ -24,17 +24,17 @@ class MySQLClass:
         self.mycursor.close()
         self.conn.close()
     
-    def getAllMangaList(self, options='True'):
+    def getAllMangaList(self, options='True', table='ReadMng'):
         self.connect()
-        sql = f"SELECT * FROM mangaDatabase WHERE {options} ORDER BY MangaTitle"
+        sql = f"SELECT * FROM {table} WHERE {options} ORDER BY Title"
         self.mycursor.execute(sql,)
         mangaList = self.mycursor.fetchall()
         self.disconnect()
         return mangaList
 
-    def doesExist(self,manga):
+    def doesExist(self,manga,table='ReadMng'):
         self.connect()
-        sql = "SELECT COUNT(1) FROM mangaDatabase WHERE mangaTitle = %s"
+        sql = f"SELECT COUNT(1) FROM {table} WHERE Title = %s"
         self.mycursor.execute(sql,(manga,))
         res = self.mycursor.fetchone()
         if res is not None and res['COUNT(1)']>0:
@@ -44,9 +44,9 @@ class MySQLClass:
             self.disconnect()
             return False
 
-    def  insertValue(self, title, lastChapter, lastRead):
+    def  insertValue(self, title, lastChapter, lastRead, table='ReadMng'):
         self.connect()
-        sql = f"INSERT INTO mangaDatabase(MangaTitle, LatestChapter, LastUpdated, LastRead) VALUES ('{title}','{lastChapter}','{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}','{lastRead}')"
+        sql = f"INSERT INTO {table}(Title, LatestChapter, LastUpdated) VALUES ('{title}','{lastChapter}','{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}')"
         self.mycursor.execute(sql,)
         self.conn.commit()
         self.disconnect()
@@ -77,44 +77,44 @@ class MySQLClass:
     '''
     Chapter Points
     '''
-    def updateValue(self, title, lastChapter,option='yes'):
+    def updateValue(self, title, lastChapter,option='yes', table='ReadMng'):
         if self.doesExist(title) is False:
             self.insertValue(title, lastChapter, 0)
         self.connect()
         if option=='no':
-            sql = f"UPDATE mangaDatabase SET LatestChapter ='{lastChapter}' WHERE MangaTitle = '{title}'"
+            sql = f"UPDATE {table} SET LatestChapter ='{lastChapter}' WHERE Title = '{title}'"
         else:
-            sql = f"UPDATE mangaDatabase SET LatestChapter ='{lastChapter}', LastUpdated='{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}', ExtraInformation = CONCAT(ExtraInformation, '{lastChapter},') WHERE MangaTitle = '{title}'"
+            sql = f"UPDATE {table} SET LatestChapter ='{lastChapter}', LastUpdated='{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}', ExtraInformation = CONCAT(ExtraInformation, '{lastChapter},') WHERE Title = '{title}'"
         self.mycursor.execute(sql,)
         self.conn.commit()
         self.disconnect()
 
-    def getExtraInformation(self, title):
+    def getExtraInformation(self, title, table='ReadMng'):
         if self.doesExist(title) is False:
             self.insertValue(title, 0, 0)
         self.connect()
-        sql = "SELECT ExtraInformation FROM mangaDatabase WHERE MangaTitle = %s"
+        sql = f"SELECT ExtraInformation FROM {table} WHERE Title = %s"
         self.mycursor.execute(sql,(title,))
         extraInfo = self.mycursor.fetchone()
         self.disconnect()
         return extraInfo["ExtraInformation"]
 
-    def updateExtraInformation(self, title, extraInformation, update='on'):
+    def updateExtraInformation(self, title, extraInformation, update='on', table='ReadMng'):
         self.connect()
         if (update=='off'):
-            sql = f"UPDATE mangaDatabase SET ExtraInformation ='{extraInformation.replace(',,',',')}' WHERE MangaTitle = '{title}'"
+            sql = f"UPDATE {table} SET ExtraInformation ='{extraInformation.replace(',,',',')}' WHERE Title = '{title}'"
         else:
-            sql = f"UPDATE mangaDatabase SET ExtraInformation ='{extraInformation.replace(',,',',')}', LastUpdated='{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}' WHERE MangaTitle = '{title}'"
+            sql = f"UPDATE {table} SET ExtraInformation ='{extraInformation.replace(',,',',')}', LastUpdated='{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}' WHERE Title = '{title}'"
         self.mycursor.execute(sql,)
         self.conn.commit()
         self.disconnect()
 
-    def appendExtraInformation(self, title, extraInformation):
+    def appendExtraInformation(self, title, extraInformation,table='ReadMng'):
         self.connect()
-        sql = "UPDATE mangaDatabase SET ExtraInformation = REPLACE(ExtraInformation,',,',',') WHERE MangaTitle = %s"
+        sql = f"UPDATE {table} SET ExtraInformation = REPLACE(ExtraInformation,',,',',') WHERE Title = %s"
         self.mycursor.execute(sql,(title,))
         self.conn.commit()
-        sql = f"UPDATE mangaDatabase SET LastUpdated='{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}', ExtraInformation = CONCAT(ExtraInformation, '{extraInformation},') WHERE MangaTitle = '{title}'"
+        sql = f"UPDATE {table} SET LastUpdated='{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}', ExtraInformation = CONCAT(ExtraInformation, '{extraInformation},') WHERE Title = '{title}'"
         self.mycursor.execute(sql,)
         self.conn.commit()
         self.disconnect()

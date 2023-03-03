@@ -23,14 +23,11 @@ class Sort:
         '''
         return [ self.atof(c) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text) ]
 
-    def main_sort(self, options='True'):
-        sqlquery = f"SELECT MangaTitle FROM mangaDatabase WHERE {options}"
-        mycursor = self.sql.mycursor
-        mycursor.execute(sqlquery,)
-        extraInfo = mycursor.fetchall()
-        for x in extraInfo:
+    def main_sort(self, table='ReadMng'):
+        mangas = self.sql.getAllMangaList(table=table)
+        for manga in mangas:
             sortedString = ''
-            unsort = self.sql.getExtraInformation(x["MangaTitle"])
+            unsort = self.sql.getExtraInformation(manga["Title"],table=table)
             if unsort is None:
                 continue
             trysorted = unsort.split(',')[:-1]
@@ -38,8 +35,9 @@ class Sort:
             trysorted.sort(key = self.natural_keys)
             for y in trysorted:
                 sortedString += f'{y},'
-            self.sql.updateExtraInformation(x['MangaTitle'], sortedString,'off')
+            self.sql.updateExtraInformation(manga['Title'], sortedString,'off',table=table)
 
 if __name__ == "__main__":
     sort = Sort()
-    sort.main_sort()
+    #sort.main_sort()
+    sort.main_sort('AsuraScans')

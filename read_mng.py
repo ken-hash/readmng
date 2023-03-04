@@ -106,7 +106,7 @@ class ReadMng:
         if self.sql.doesExist(self.title):
             chaptersChecked = self.sql.getExtraInformation(self.title) 
         else:
-            self.sql.insertValue(self.title,"",self.chapterNumLinks[0])
+            self.sql.insertValue(self.title,self.chapterNumLinks[0])
             chaptersChecked = self.sql.getExtraInformation(self.title) 
         return self.sqlLinks(chaptersChecked)
 

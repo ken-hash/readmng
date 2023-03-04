@@ -78,8 +78,8 @@ class MySQLClass:
     Chapter Points
     '''
     def updateValue(self, title, lastChapter,option='yes', table='ReadMng'):
-        if self.doesExist(title) is False:
-            self.insertValue(title, lastChapter, 0)
+        if self.doesExist(title, table) is False:
+            self.insertValue(title, lastChapter, table)
         self.connect()
         if option=='no':
             sql = f"UPDATE {table} SET LatestChapter ='{lastChapter}' WHERE Title = '{title}'"
@@ -90,8 +90,8 @@ class MySQLClass:
         self.disconnect()
 
     def getExtraInformation(self, title, table='ReadMng'):
-        if self.doesExist(title) is False:
-            self.insertValue(title, 0, 0)
+        if self.doesExist(title,table) is False:
+            self.insertValue(title, 0, table)
         self.connect()
         sql = f"SELECT ExtraInformation FROM {table} WHERE Title = %s"
         self.mycursor.execute(sql,(title,))

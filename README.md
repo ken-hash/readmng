@@ -1,25 +1,31 @@
-Simple scrapping scripts
+# Simple Scrapping Scripts
 
-Copy of my personal manga scraper used to download manga into local computer
+This repository contains a collection of simple scripts used for scraping manga data and downloading it onto a local computer. These scripts were originally developed as a personal manga scraper for downloading manga into a local computer.
 
-downloader_service.py to be used as service
- --- checks downloadqueues and download 10 oldest manga chapter queues into computer
+## Scripts
 
-checkhome.py 
- --- can be used as a service
-   --- periodically check if theres a newly added manga in the db then sync off missing chapters 
-        into local computer
-   --- if there is no newly added manga then check readmng site for newly updated manga
-        then syncs off missing chapters
+* `downloader_service.py`: This script can be used as a service to automate the process of downloading manga chapters. It checks the download queues and downloads the 10 oldest manga chapter queues into the computer.
 
-sqlsqlsqlsql.py
- --- script to manually check all/individual manga and sync up missing chapters
+* `checkhome.py`: This script can be used as a service to periodically check if there are newly added manga in the database and sync off missing chapters into the local computer. If there are no newly added manga, it checks the readmng site for newly updated manga and syncs off missing chapters.
 
-redownloader.py
- --- script to manually check manga folder of corrupted/empty downloaded images and attempts to redownload.
+* `sqlsqlsqlsql.py`: This script can be used to manually check all/individual manga and sync up missing chapters.
 
-sort.py
- --- script to sort mangachapters in db
+* `redownloader.py`: This script can be used to manually check the manga folder for corrupted/empty downloaded images and attempts to redownload.
 
-mmsort.py
- --- script to manually sort all/individual manga chapters in webserver db
+* `sort.py`: This script can be used to sort manga chapters in the database.
+
+* `mmsort.py`: This script can be used to manually sort all/individual manga chapters in the webserver database.
+
+## How to Use
+
+1. Clone this repository to your local machine using `git clone https://github.com/yourusername/simple-scraper.git`
+2. Install the necessary dependencies using `pip install -r requirements.txt`
+3. Run the desired script using `python scriptname.py`
+
+## Contributing
+
+Contributions are always welcome! If you have any ideas, suggestions or found a bug, feel free to submit an issue or a pull request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -28,9 +28,8 @@ class AsuraManga:
 	ChromeDriverManager().install()))
         if self.validateItems(title) is None:
             raise Exception(f'Error {title} is Invalid ')
-        self.chapterNumLinks = []
+        self.chapterNumLinks = {}
         self.sql = MySQLClass()
-        self.chapterlinks = []
         self.getAllAvailableChapters()
         if os.name == 'nt':
             self.downloadPath =  os.path.join("\\\\192.168.50.11","Public-Manga","downloads")
@@ -75,9 +74,10 @@ class AsuraManga:
         chapterBoxes = self.soup.html.body.findAll('div',{'class':'chbox'})
         for chapterBox in chapterBoxes:
             chapterLinks = chapterBox.find('a',{'href':True}).get('href')
-            numChapterLinks = chapterLinks.split('chapter-')[-1].replace('/','')
-            self.chapterlinks.append(chapterLinks)
-            self.chapterNumLinks.append(numChapterLinks)
+            match = re.search(r'(?<=ch-)\d?[^\/]+|(?<=ch(?:apter){1}-)\d?[^\/]+', chapterLinks)
+            if match:
+                numChapterLinks = match.group(0)
+            self.chapterNumLinks[numChapterLinks] = chapterLinks
 
     #checks sql chapters csv and return missing chapters from available readmanga chapters
     def sqlLinks(self,extraInfo):
@@ -89,12 +89,12 @@ class AsuraManga:
             extraInfoList = []
         s = set(extraInfoList)
         #missing chapters
-        notchecked = [x for x in self.chapterNumLinks if x not in s]
+        notchecked = [x for x in self.chapterNumLinks.keys if x not in s]
         if len(notchecked)==0:
             return 
         else:
             for x in range(len(notchecked)):
-                selectedLinks.append(f"https://www.asurascans.com/{self.title}-chapter-{notchecked[x]}")
+                selectedLinks.append(self.chapterNumLinks[notchecked[x]])
         return selectedLinks
 
     #checks sql chapters csv and return missing chapters from available readmanga chapters
@@ -123,8 +123,7 @@ class AsuraManga:
                     continue
                 chapterDict = {}
                 #scrape all images from the chapter link
-                chapterDict['link']= f"https://www.asurascans.com/{self.title}-chapter-{chap}"
-                imagesMatch = self.getImageLinks(chapterDict['link'])
+                imagesMatch = self.getImageLinks(self.chapterNumLinks[chap])
                 chapterDict['ImageList'] = []
                 path = os.path.join(self.downloadPath,self.title,chap)
                 if imagesMatch is None:
@@ -140,7 +139,7 @@ class AsuraManga:
         return selectedLinks
 
     #get all images founded in the manga page
-    def getImageLinks(self, htmlLink):
+    def getImageLinks(self, htmlLink,option='Ok'):
         self.driver.get(htmlLink)
         self.wait_for_secure_connection(self.driver)
         wait = WebDriverWait(self.driver, 10)
@@ -153,9 +152,10 @@ class AsuraManga:
         response = self.driver.page_source
         soup = BeautifulSoup(response,'lxml')
         readerarea = soup.find('div',{'id':'readerarea'})
-        images = readerarea.find_all('img',{'class':re.compile(r'wp-image-')})
-        #readerarea
-        #src="https://asurascans.com/wp-content/uploads/2022/02/00-243.jpg"
+        if readerarea is None:
+            return None
+        else:
+            images = readerarea.find_all('img',{'class':re.compile(r'wp-image-')})
         imagesMatch = []
         for image in images: 
             imagesMatch.append(image.get('src'))

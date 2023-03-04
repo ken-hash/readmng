@@ -39,5 +39,5 @@ class Sort:
 
 if __name__ == "__main__":
     sort = Sort()
-    #sort.main_sort()
+    sort.main_sort()
     sort.main_sort('AsuraScans')

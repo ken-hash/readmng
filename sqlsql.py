@@ -44,7 +44,7 @@ class MySQLClass:
             self.disconnect()
             return False
 
-    def  insertValue(self, title, lastChapter, lastRead, table='ReadMng'):
+    def  insertValue(self, title, lastChapter, table='ReadMng'):
         self.connect()
         sql = f"INSERT INTO {table}(Title, LatestChapter, LastUpdated) VALUES ('{title}','{lastChapter}','{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}')"
         self.mycursor.execute(sql,)

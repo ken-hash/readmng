@@ -37,13 +37,14 @@ class AsuraManga:
             self.downloadPath = os.path.join('/','mnt','MangaPi','downloads')
         
         
-    def wait_for_secure_connection(self, driver, timeout=10):
+    def wait_for_secure_connection(self, driver, timeout=1):
         try:
-            WebDriverWait(driver, timeout).until(
+            wait = WebDriverWait(driver, timeout)
+            wait.until(
                 EC.url_contains("https://")
             )
         except Exception as e:
-            print("Secure connection not established within specified timeout.")
+            raise Exception(f"Secure connection not established within specified timeout. {e}")
 
     #validate parameters return None if title is invalid
     def validateItems(self, title):
@@ -62,7 +63,10 @@ class AsuraManga:
     #check if title is found in asura
     def initWebScrape(self):
         self.driver.get(self.url)
-        self.wait_for_secure_connection(self.driver)
+        try:
+            self.wait_for_secure_connection(self.driver)
+        except:
+            pass
         data = self.driver.page_source
         self.soup = BeautifulSoup(data,'lxml')
         if self.soup.html.body.find('div',{'class':'releases'}) is None:
@@ -77,6 +81,11 @@ class AsuraManga:
             match = re.search(r'(?<=ch-)\d?[^\/]+|(?<=ch(?:apter){1}-)\d?[^\/]+', chapterLinks)
             if match:
                 numChapterLinks = match.group(0)
+            else:
+                text = chapterBox.find('span',{'class':'chapternum'}).text
+                matchText = re.search(r'Chapter\s*(\d+)',text)
+                if matchText:
+                    numChapterLinks = matchText.group(1)
             self.chapterNumLinks[numChapterLinks] = chapterLinks
 
     #checks sql chapters csv and return missing chapters from available readmanga chapters
@@ -141,8 +150,11 @@ class AsuraManga:
     #get all images founded in the manga page
     def getImageLinks(self, htmlLink,option='Ok'):
         self.driver.get(htmlLink)
-        self.wait_for_secure_connection(self.driver)
-        wait = WebDriverWait(self.driver, 10)
+        try:
+            self.wait_for_secure_connection(self.driver)
+        except:
+            pass
+        wait = WebDriverWait(self.driver, 5)
         #.wp-image-173795
         try:
             wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR,'img[decoding="async"][loading="lazy"]')))
@@ -166,13 +178,14 @@ class AsuraManga:
     #get all nondownloaded chapters based on title
     #if manga title isnt in database then insert
     def getChaptersToDownload(self):
+        orderedDict = OrderedDict(self.chapterNumLinks.items())
+        orderedList = list(orderedDict)
+        if len(orderedList)==0:
+            return None
         if self.sql.doesExist(self.title,'AsuraScans'):
             chaptersChecked = self.sql.getExtraInformation(self.title,'AsuraScans') 
+            self.sql.updateValue(self.title,orderedList[0],'no','AsuraScans')
         else:
-            orderedDict = OrderedDict(self.chapterNumLinks.items())
-            orderedList = list(orderedDict)
-            if len(orderedList)==0:
-                return None
             self.sql.insertValue(self.title,orderedList[0],'AsuraScans')
             chaptersChecked = self.sql.getExtraInformation(self.title,'AsuraScans') 
         return self.sqlLinks(chaptersChecked)
@@ -190,6 +203,52 @@ class AsuraManga:
         dlObject.url = url
         return dlObject
 
+class AsuraScansSite:
+    def __init__(self):
+        chrome_options = uc.ChromeOptions()
+        chrome_options.add_argument("start-maximized")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        self.driver = webdriver.Chrome(options=chrome_options, service=ChromeService( 
+	ChromeDriverManager().install()))
+        self.prefix = '1672760368'
+
+    #returns all latest manga found in homepage
+    def getHomePageAvailableManga(self):
+        url = "https://www.asurascans.com/"
+        self.driver.get(url)
+        wait = WebDriverWait(self.driver, 5)
+        try:
+            wait.until(EC.presence_of_element_located((By.XPATH, '//body')))
+        except Exception as e:
+            print(e)
+            pass
+        response = self.driver.page_source
+        soup = BeautifulSoup(response,'lxml')
+        mangaupdates = soup.findAll("div", {"class": "utao styletwo"})
+        allAvailableMangas = {}
+        for manga in mangaupdates:
+            linkElem = manga.find("a",{"title":True})
+            link = linkElem.get('href')
+            match = re.search(r'/([\w-]+)/(?:|[\w-]+-)([\w-]+)', link)
+            if match:
+                title = match.group(2).split(f'{self.prefix}-')[-1]
+            allAvailableMangas[title]={'chapters':[]}
+            try:
+                allAvailableChapters = manga.findAll('li')
+                for chapter in allAvailableChapters:
+                    chapterText = chapter.find('a').text
+                    matchText = re.search(r'Chapter\s*(\d+)',chapterText)
+                    if matchText:
+                        chapterCheck = matchText.group(1)
+                    allAvailableMangas[title]['chapters'].append(chapterCheck)
+            except Exception as e:
+                print(e)
+                continue
+        self.driver.close()
+        return allAvailableMangas
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if len(args) > 0:
@@ -198,9 +257,18 @@ if __name__ == "__main__":
             asura.getChaptersToDownload()
             asura.driver.quit()
     else:
+        asura = AsuraScansSite()
+        newMangas = asura.getHomePageAvailableManga()
+        for manga in newMangas:
+            asura = AsuraManga(manga)
+            asura.getChaptersToDownload()
+            asura.driver.quit()
+        '''
         sql = MySQLClass()
         mangas = sql.getAllMangaList(table='AsuraScans')
         for manga in mangas:
             asura = AsuraManga(manga['Title'])
             asura.getChaptersToDownload()
             asura.driver.quit()
+        '''
+

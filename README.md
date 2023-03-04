@@ -18,9 +18,9 @@ This repository contains a collection of simple scripts used for scraping manga 
 
 ## How to Use
 
-1. Clone this repository to your local machine using `git clone https://github.com/yourusername/simple-scraper.git`
+1. Clone this repository to your local machine using `git clone https://github.com/ken-hash/readmng.git`
 2. Install the necessary dependencies using `pip install -r requirements.txt`
-3. Run the desired script using `python scriptname.py`
+3. Run the desired script using `python3 checkhome.py`
 
 ## Contributing
 

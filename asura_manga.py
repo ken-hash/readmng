@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options 
 import undetected_chromedriver as uc 
 import re
+from collections import OrderedDict
 from download_model import DownloadObject
 import os
 from sqlsql import MySQLClass
@@ -168,7 +169,9 @@ class AsuraManga:
         if self.sql.doesExist(self.title,'AsuraScans'):
             chaptersChecked = self.sql.getExtraInformation(self.title,'AsuraScans') 
         else:
-            self.sql.insertValue(self.title,"",self.chapterNumLinks[0],'AsuraScans')
+            orderedDict = OrderedDict(self.chapterNumLinks.items())
+            orderedList = list(orderedDict)
+            self.sql.insertValue(self.title,orderedList[0],'AsuraScans')
             chaptersChecked = self.sql.getExtraInformation(self.title,'AsuraScans') 
         return self.sqlLinks(chaptersChecked)
 

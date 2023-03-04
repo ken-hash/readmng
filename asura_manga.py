@@ -171,6 +171,8 @@ class AsuraManga:
         else:
             orderedDict = OrderedDict(self.chapterNumLinks.items())
             orderedList = list(orderedDict)
+            if len(orderedList)==0:
+                return None
             self.sql.insertValue(self.title,orderedList[0],'AsuraScans')
             chaptersChecked = self.sql.getExtraInformation(self.title,'AsuraScans') 
         return self.sqlLinks(chaptersChecked)

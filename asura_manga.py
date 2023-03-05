@@ -11,6 +11,7 @@ import re
 from collections import OrderedDict
 from download_model import DownloadObject
 import os
+import datetime
 from sqlsql import MySQLClass
 import sys
 
@@ -62,8 +63,8 @@ class AsuraManga:
 
     #check if title is found in asura
     def initWebScrape(self):
-        self.driver.get(self.url)
         try:
+            self.driver.get(self.url)
             self.wait_for_secure_connection(self.driver)
         except:
             pass
@@ -148,9 +149,9 @@ class AsuraManga:
         return selectedLinks
 
     #get all images founded in the manga page
-    def getImageLinks(self, htmlLink,option='Ok'):
-        self.driver.get(htmlLink)
+    def getImageLinks(self, htmlLink):
         try:
+            self.driver.get(htmlLink)
             self.wait_for_secure_connection(self.driver)
         except:
             pass
@@ -167,8 +168,10 @@ class AsuraManga:
         if readerarea is None:
             return None
         else:
-            images = readerarea.find_all('img',{'class':re.compile(r'wp-image-')})
+            images = readerarea.find_all('img',{'decoding':'async'})
         imagesMatch = []
+        if images is None:
+            images = readerarea.find_all('img',{'class':re.compile(r'wp-image')})
         for image in images: 
             imagesMatch.append(image.get('src'))
         if imagesMatch is None or len(imagesMatch) == 0:
@@ -212,11 +215,13 @@ class AsuraScansSite:
         self.driver = webdriver.Chrome(options=chrome_options, service=ChromeService( 
 	ChromeDriverManager().install()))
         self.prefix = '1672760368'
+        self.url = "https://www.asurascans.com/"
+        self.sessionTime = datetime.datetime.now()
+        self.sql = MySQLClass()
 
     #returns all latest manga found in homepage
     def getHomePageAvailableManga(self):
-        url = "https://www.asurascans.com/"
-        self.driver.get(url)
+        self.driver.get(self.url)
         wait = WebDriverWait(self.driver, 5)
         try:
             wait.until(EC.presence_of_element_located((By.XPATH, '//body')))
@@ -227,20 +232,36 @@ class AsuraScansSite:
         soup = BeautifulSoup(response,'lxml')
         mangaupdates = soup.findAll("div", {"class": "utao styletwo"})
         allAvailableMangas = {}
+        #lastUpdated = datetime.datetime.strptime(self.sql.getLastUpdated()['LastUpdated'], "%Y-%m-%d %H:%M:%S")
+        lastUpdated = self.sql.getLastUpdated()['LastUpdated']
         for manga in mangaupdates:
             linkElem = manga.find("a",{"title":True})
             link = linkElem.get('href')
             match = re.search(r'/([\w-]+)/(?:|[\w-]+-)([\w-]+)', link)
             if match:
                 title = match.group(2).split(f'{self.prefix}-')[-1]
-            allAvailableMangas[title]={'chapters':[]}
             try:
                 allAvailableChapters = manga.findAll('li')
                 for chapter in allAvailableChapters:
                     chapterText = chapter.find('a').text
-                    matchText = re.search(r'Chapter\s*(\d+)',chapterText)
-                    if matchText:
-                        chapterCheck = matchText.group(1)
+                    timedeltaText = chapter.find('span').text
+                    timedeltaNum = re.match(r'\d+', timedeltaText).group(0)
+                    timedeltaMatch = re.search(r"(\d+)\s+(week|weeks|hour|hours|day|days)", timedeltaText)
+                    if timedeltaMatch:
+                        timeDelta = timedeltaMatch.group(2)
+                    if timeDelta == 'hour' or timeDelta == 'hours':
+                        dateTimeAgo = self.sessionTime - datetime.timedelta(hours=int(timedeltaNum))
+                    elif timeDelta == 'day' or timeDelta == 'days':
+                        dateTimeAgo = self.sessionTime - datetime.timedelta(days=int(timedeltaNum))
+                    else:
+                        dateTimeAgo = self.sessionTime - datetime.timedelta(weeks=int(timedeltaNum))
+                    if lastUpdated >= dateTimeAgo:
+                        break
+                    chapterMatch = re.search(r'Chapter\s*(\d+)',chapterText)
+                    if chapterMatch:
+                        chapterCheck = chapterMatch.group(1)
+                    if title not in allAvailableMangas:
+                        allAvailableMangas[title]={'chapters':[]}
                     allAvailableMangas[title]['chapters'].append(chapterCheck)
             except Exception as e:
                 print(e)

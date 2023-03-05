@@ -119,6 +119,13 @@ class MySQLClass:
         self.conn.commit()
         self.disconnect()
 
+    def getLastUpdated(self, condition='True', table='ReadMng'):
+        self.connect()
+        sql = f"SELECT LastUpdated FROM {table} WHERE {condition} ORDER BY LastUpdated DESC LIMIT 1"
+        self.mycursor.execute(sql,)
+        res = self.mycursor.fetchone()
+        return res
+    
     '''
     Queue Points
     '''

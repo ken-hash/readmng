@@ -233,7 +233,7 @@ class AsuraScansSite:
         mangaupdates = soup.findAll("div", {"class": "utao styletwo"})
         allAvailableMangas = {}
         #lastUpdated = datetime.datetime.strptime(self.sql.getLastUpdated()['LastUpdated'], "%Y-%m-%d %H:%M:%S")
-        lastUpdated = self.sql.getLastUpdated()['LastUpdated']
+        lastUpdated = self.sql.getLastUpdated(table='AsuraScans')['LastUpdated']
         for manga in mangaupdates:
             linkElem = manga.find("a",{"title":True})
             link = linkElem.get('href')
@@ -246,10 +246,12 @@ class AsuraScansSite:
                     chapterText = chapter.find('a').text
                     timedeltaText = chapter.find('span').text
                     timedeltaNum = re.match(r'\d+', timedeltaText).group(0)
-                    timedeltaMatch = re.search(r"(\d+)\s+(week|weeks|hour|hours|day|days)", timedeltaText)
+                    timedeltaMatch = re.search(r"(\d+)\s+(min|mins|week|weeks|hour|hours|day|days)", timedeltaText)
                     if timedeltaMatch:
                         timeDelta = timedeltaMatch.group(2)
-                    if timeDelta == 'hour' or timeDelta == 'hours':
+                    if timeDelta == 'min' or timeDelta == 'mins':
+                        dateTimeAgo = self.sessionTime - datetime.timedelta(minutes=int(timedeltaNum))
+                    elif timeDelta == 'hour' or timeDelta == 'hours':
                         dateTimeAgo = self.sessionTime - datetime.timedelta(hours=int(timedeltaNum))
                     elif timeDelta == 'day' or timeDelta == 'days':
                         dateTimeAgo = self.sessionTime - datetime.timedelta(days=int(timedeltaNum))

@@ -27,22 +27,24 @@ class Downloader:
         return True
 
     #downloads list of download objects
-    def downloadLinks(self, imageList):
-        if self.validateLinks(imageList) is True:
+    def downloadLinks(self, downloadList):
+        if self.validateLinks(downloadList) is True:
             title = None
             chapternum = None
             chapterPath = None
             dictMangaDownloaded = {}
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                for dlObject in imageList:
+                for dlObject in downloadList:
                     try:
                         title = dlObject.title
                         chapternum = dlObject.chapterNum
+                        filename = dlObject.fileId
                         if title not in dictMangaDownloaded:
-                            dictMangaDownloaded[title] = []
-                            dictMangaDownloaded[title].append(chapternum)
-                        elif chapternum not in dictMangaDownloaded[title]:
-                            dictMangaDownloaded[title].append(chapternum)
+                            dictMangaDownloaded[title]= {}
+                        if chapternum not in dictMangaDownloaded[title]:
+                            dictMangaDownloaded[title][chapternum] = []
+                        if filename not in dictMangaDownloaded[title][chapternum]:
+                            dictMangaDownloaded[title][chapternum].append(filename)
                         chapterPath = os.path.join(self.downloadPath,title,chapternum)
                         #skip if chapter is in exclusion list
                         if self.checkChapterIsValid(title, chapternum) is False:
@@ -52,12 +54,7 @@ class Downloader:
                             self.sql.addChapterExcluded(title,chapternum)
                             continue
                         #if number of files in folder matches the number of images in chapters then skip
-                        filesInFolder = len(os.listdir(chapterPath))
-                        imagesAvailable = len(imageList)
-                        numChapToDownload = imagesAvailable - filesInFolder
                         path = os.path.join(self.downloadPath,title,chapternum,dlObject.fileId)
-                        if numChapToDownload == 0:
-                            continue
                         #else check if file needs to be downloaded is in folder then download
                         if not os.path.exists(path):
                             executor.submit(self.download, dlObject)
@@ -69,8 +66,7 @@ class Downloader:
                     chapterPath = os.path.join(self.downloadPath,manga,chapter)
                     #check if 
                     if self.checkDownloadedItems(chapterPath, manga, chapter) is True:
-                        imgList = os.listdir(chapterPath)
-                        imgList.sort(key = self.sort.natural_keys)
+                        imgList = dictMangaDownloaded[manga][chapter]
                         payload = ','.join(imgList)
                         self.req.createPayload(manga,chapter,payload)
                         req = self.req.sendRequest()

@@ -16,9 +16,9 @@ from sqlsql import MySQLClass
 import sys
 
 class AsuraManga:
-    def __init__(self, title):
+    def __init__(self, title, mangaLink=None):
         chrome_options = uc.ChromeOptions()
-        #headless seems cant go past cloudflare bot detection
+                #headless seems cant go past cloudflare bot detection
         #chrome_options.add_argument('--headless')
         #chrome_options.add_argument("--log-level=3")
         #chrome_options.headless = True
@@ -27,6 +27,10 @@ class AsuraManga:
         chrome_options.add_experimental_option('useAutomationExtension', False)
         self.driver = webdriver.Chrome(options=chrome_options, service=ChromeService( 
 	ChromeDriverManager().install()))
+        if mangaLink is None:
+            self.getMangaLinks()
+        else:
+            self.mangaLink = mangaLink
         if self.validateItems(title) is None:
             raise Exception(f'Error {title} is Invalid ')
         self.chapterNumLinks = {}
@@ -37,7 +41,34 @@ class AsuraManga:
         else:
             self.downloadPath = os.path.join('/','mnt','MangaPi','downloads')
         
-        
+    def getMangaLinks(self):
+        allMangaList = "https://www.asurascans.com/manga/list-mode/"
+        try:
+            self.driver.get(allMangaList)
+            self.wait_for_secure_connection(self.driver)
+        except:
+            pass
+        self.mangaLink = {}
+        data = self.driver.page_source
+        self.soup = BeautifulSoup(data,'lxml')
+        mangaList = self.soup.html.body.find('div',{'class':'soralist'})
+        mangas = mangaList.findAll('a',{'class':'series'})
+        for manga in mangas:
+            mangaLink = manga.get('href')
+            match = re.search(r'https:\/\/www\.asurascans\.com\/manga\/\d+-([\w-]+)\/', mangaLink)
+            if match:
+                title = match.group(1)
+            else:
+                noPrefix  = re.search(r'https:\/\/www\.asurascans\.com\/manga\/([\w-]+)\/', mangaLink)
+                if noPrefix:
+                    title = noPrefix.group(1)
+                else:
+                    continue
+            if title not in self.mangaLink:
+                self.mangaLink[title] = mangaLink
+        return self.mangaLink
+
+
     def wait_for_secure_connection(self, driver, timeout=1):
         try:
             wait = WebDriverWait(driver, timeout)
@@ -53,12 +84,9 @@ class AsuraManga:
             return None
         #bug when /title is a valid manga
         self.title = title.replace('/','')
-        prefix = r'1672760368'
-        self.url = f"https://www.asurascans.com/manga/{prefix}-{self.title}"
+        self.url = self.mangaLink[title]
         if self.initWebScrape() is None:
-            self.url = f"https://www.asurascans.com/manga/{self.title}"
-            if self.initWebScrape() is None:
-                return None
+            return None
         return True
 
     #check if title is found in asura
@@ -214,7 +242,6 @@ class AsuraScansSite:
         chrome_options.add_experimental_option('useAutomationExtension', False)
         self.driver = webdriver.Chrome(options=chrome_options, service=ChromeService( 
 	ChromeDriverManager().install()))
-        self.prefix = '1672760368'
         self.url = "https://www.asurascans.com/"
         self.sessionTime = datetime.datetime.now()
         self.sql = MySQLClass()
@@ -237,9 +264,12 @@ class AsuraScansSite:
         for manga in mangaupdates:
             linkElem = manga.find("a",{"title":True})
             link = linkElem.get('href')
-            match = re.search(r'/([\w-]+)/(?:|[\w-]+-)([\w-]+)', link)
+            match = re.search(r'https:\/\/www\.asurascans\.com\/manga\/\d+-([\w-]+)\/', link)
             if match:
-                title = match.group(2).split(f'{self.prefix}-')[-1]
+                title = match.group(1)
+            else:
+                noPrefix  = re.search(r'https:\/\/www\.asurascans\.com\/manga\/([\w-]+)\/', link)
+                title = noPrefix.group(1)
             try:
                 allAvailableChapters = manga.findAll('li')
                 for chapter in allAvailableChapters:
@@ -247,16 +277,16 @@ class AsuraScansSite:
                     timedeltaText = chapter.find('span').text
                     timedeltaNum = re.match(r'\d+', timedeltaText).group(0)
                     timedeltaMatch = re.search(r"(\d+)\s+(min|mins|week|weeks|hour|hours|day|days)", timedeltaText)
-                    if timedeltaMatch:
-                        timeDelta = timedeltaMatch.group(2)
-                    if timeDelta == 'min' or timeDelta == 'mins':
-                        dateTimeAgo = self.sessionTime - datetime.timedelta(minutes=int(timedeltaNum))
-                    elif timeDelta == 'hour' or timeDelta == 'hours':
-                        dateTimeAgo = self.sessionTime - datetime.timedelta(hours=int(timedeltaNum))
-                    elif timeDelta == 'day' or timeDelta == 'days':
-                        dateTimeAgo = self.sessionTime - datetime.timedelta(days=int(timedeltaNum))
+                    if timedeltaMatch is None:
+                        dateTimeAgo = self.sessionTime - datetime.timedelta(seconds=1)
                     else:
-                        dateTimeAgo = self.sessionTime - datetime.timedelta(weeks=int(timedeltaNum))
+                        timeDelta = timedeltaMatch.group(2)
+                        if timeDelta == 'min' or timeDelta == 'mins':
+                            dateTimeAgo = self.sessionTime - datetime.timedelta(minutes=int(timedeltaNum))
+                        elif timeDelta == 'hour' or timeDelta == 'hours':
+                            dateTimeAgo = self.sessionTime - datetime.timedelta(hours=int(timedeltaNum))
+                        elif timeDelta == 'day' or timeDelta == 'days':
+                            dateTimeAgo = self.sessionTime - datetime.timedelta(days=int(timedeltaNum))
                     if lastUpdated >= dateTimeAgo:
                         break
                     chapterMatch = re.search(r'Chapter\s*(\d+)',chapterText)
@@ -274,16 +304,21 @@ class AsuraScansSite:
 
 if __name__ == "__main__":
     args = sys.argv[1:]
+    mangaList = None
     if len(args) > 0:
         for arg in args:
-            asura = AsuraManga(arg)
+            asura = AsuraManga(arg, mangaList)
+            if mangaList is None:
+                mangaList = asura.getMangaLinks()
             asura.getChaptersToDownload()
             asura.driver.quit()
     else:
         asura = AsuraScansSite()
         newMangas = asura.getHomePageAvailableManga()
         for manga in newMangas:
-            asura = AsuraManga(manga)
+            asura = AsuraManga(manga, mangaList)
+            if mangaList is None:
+                mangaList = asura.getMangaLinks()
             asura.getChaptersToDownload()
             asura.driver.quit()
         '''

@@ -45,6 +45,11 @@ class Downloader:
                             dictMangaDownloaded[title][chapternum] = []
                         if filename not in dictMangaDownloaded[title][chapternum]:
                             dictMangaDownloaded[title][chapternum].append(filename)
+                        if re.search(r"asurascans", dlObject.url):
+                            table = "AsuraScans"
+                        else:
+                            table = "ReadMng"
+                        dictMangaDownloaded[title]["Table"] = table
                         chapterPath = os.path.join(self.downloadPath,title,chapternum)
                         #skip if chapter is in exclusion list
                         if self.checkChapterIsValid(title, chapternum) is False:
@@ -64,8 +69,8 @@ class Downloader:
             for manga in dictMangaDownloaded:
                 for chapter in dictMangaDownloaded[manga]:
                     chapterPath = os.path.join(self.downloadPath,manga,chapter)
-                    #check if 
-                    if self.checkDownloadedItems(chapterPath, manga, chapter) is True:
+                    table = dictMangaDownloaded[manga]["Table"]
+                    if self.checkDownloadedItems(chapterPath, manga, chapter, table) is True:
                         imgList = dictMangaDownloaded[manga][chapter]
                         payload = ','.join(imgList)
                         self.req.createPayload(manga,chapter,payload)
@@ -78,7 +83,7 @@ class Downloader:
                             print(f'Modified: {req.text}')
 
     #update manga db when the download has atleast one image downloaded
-    def checkDownloadedItems(self, path, title, chapterNum):
+    def checkDownloadedItems(self, path, title, chapterNum, table):
         if self.checkItems(path):
             if self.options == "show":
                 if os.name == 'nt':
@@ -86,10 +91,7 @@ class Downloader:
                 else:
                     os.system('clear')
             print(f"Downloaded: {chapterNum:>5s} of {title+'.':<20}")
-            if self.sql.doesExist(title, 'AsuraScans'):
-                self.sql.appendExtraInformation(title, chapterNum,'AsuraScans')
-            else:
-                self.sql.appendExtraInformation(title, chapterNum)
+            self.sql.appendExtraInformation(title, chapterNum, table)
             return True
         else:
             print(f"Chapter {chapterNum:>5s} of {title+'.':<20} - Failed Download")

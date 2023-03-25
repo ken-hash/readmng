@@ -49,7 +49,7 @@ class Sort:
                             unsortedNext = chap
                     dateTime = unsortedNext['DateTime'] - datetime.timedelta(milliseconds=random.randint(1,20))
                     id = unsortedNext['MangaLogId']
-                    print(f"FORCING FIX {self.title}:{self.unsorted[elem+1]}")
+                    print(f"[{self.title}] FORCING FIX {self.title}:{self.unsorted[elem+1]}")
                     self.sql.UpdateMangaLogDateTime(id,dateTime)
                     self.main_sort()
                     break
@@ -62,7 +62,7 @@ class Sort:
                         if chap['MangaChapter'] == self.sorted[elem]:
                             id = chap['MangaLogId']
                         if dateTime is not None and id is not None:
-                            print(f"inserting {chap['MangaChapter']} after {previousSortedChapter}")
+                            print(f"[{self.title}] inserting {chap['MangaChapter']} after {previousSortedChapter}")
                             self.sql.UpdateMangaLogDateTime(id,dateTime)
                             self.main_sort()
                             break
@@ -74,7 +74,7 @@ class Sort:
                             sortedFirst = chap
                     dateTime = unsortedFirst['DateTime'] - datetime.timedelta(milliseconds=1)
                     id = sortedFirst['MangaLogId']
-                    print(f"inserting {self.sorted[elem]} as first chapter")
+                    print(f"[{self.title}] inserting {self.sorted[elem]} as first chapter")
                     self.sql.UpdateMangaLogDateTime(id,dateTime)
                     self.main_sort()
                     break
@@ -87,5 +87,5 @@ if __name__ == "__main__":
     else:
         allManga = MSSQLClass().getAllMangas()
         for manga in allManga:
-            print(f"checking {manga['Name']}")
+            #print(f"checking {manga['Name']}")
             Sort(manga['Name']).main_sort()

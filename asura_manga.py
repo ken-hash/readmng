@@ -18,10 +18,6 @@ import sys
 class AsuraManga:
     def __init__(self, title, mangaLink=None):
         chrome_options = uc.ChromeOptions()
-                #headless seems cant go past cloudflare bot detection
-        #chrome_options.add_argument('--headless')
-        #chrome_options.add_argument("--log-level=3")
-        #chrome_options.headless = True
         chrome_options.add_argument("start-maximized")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
@@ -260,7 +256,7 @@ class AsuraScansSite:
         mangaupdates = soup.findAll("div", {"class": "utao styletwo"})
         allAvailableMangas = {}
         #lastUpdated = datetime.datetime.strptime(self.sql.getLastUpdated()['LastUpdated'], "%Y-%m-%d %H:%M:%S")
-        lastUpdated = self.sql.getLastUpdated(table='AsuraScans')['LastUpdated']
+        dictManga = self.sql.getLastUpdated(table='AsuraScans')
         for manga in mangaupdates:
             linkElem = manga.find("a",{"title":True})
             link = linkElem.get('href')
@@ -287,11 +283,14 @@ class AsuraScansSite:
                             dateTimeAgo = self.sessionTime - datetime.timedelta(hours=int(timedeltaNum))
                         elif timeDelta == 'day' or timeDelta == 'days':
                             dateTimeAgo = self.sessionTime - datetime.timedelta(days=int(timedeltaNum))
-                    if lastUpdated >= dateTimeAgo:
-                        break
                     chapterMatch = re.search(r'Chapter\s*(\d+)',chapterText)
                     if chapterMatch:
                         chapterCheck = chapterMatch.group(1)
+                    if title in dictManga:
+                        if chapterCheck == dictManga[title][0]:
+                            break
+                        elif dictManga[title][1] >= dateTimeAgo:
+                            break
                     if title not in allAvailableMangas:
                         allAvailableMangas[title]={'chapters':[]}
                     allAvailableMangas[title]['chapters'].append(chapterCheck)
@@ -325,7 +324,9 @@ if __name__ == "__main__":
         sql = MySQLClass()
         mangas = sql.getAllMangaList(table='AsuraScans')
         for manga in mangas:
-            asura = AsuraManga(manga['Title'])
+            asura = AsuraManga(manga['Title'], mangaList)
+            if mangaList is None:
+                mangaList = asura.getMangaLinks()
             asura.getChaptersToDownload()
             asura.driver.quit()
         '''

@@ -40,12 +40,12 @@ class Downloader:
                         chapternum = dlObject.chapterNum
                         filename = dlObject.fileId
                         if title not in dictMangaDownloaded:
-                            dictMangaDownloaded[title]= {}
-                        if chapternum not in dictMangaDownloaded[title]:
-                            dictMangaDownloaded[title][chapternum] = []
-                        if filename not in dictMangaDownloaded[title][chapternum]:
-                            dictMangaDownloaded[title][chapternum].append(filename)
-                        if re.search(r"asurascans", dlObject.url):
+                            dictMangaDownloaded[title]= {"Chapters": {}}
+                        if chapternum not in dictMangaDownloaded[title]["Chapters"]:
+                            dictMangaDownloaded[title]["Chapters"][chapternum] = []
+                        if filename not in dictMangaDownloaded[title]["Chapters"][chapternum]:
+                            dictMangaDownloaded[title]["Chapters"][chapternum].append(filename)
+                        if re.search(r"https?:\/\/(?:www\.)?(?:asurascans\.com|asura\.gg)", dlObject.url):
                             table = "AsuraScans"
                         else:
                             table = "ReadMng"
@@ -67,11 +67,11 @@ class Downloader:
                         print(e)
             #check and update manga's chapter image values
             for manga in dictMangaDownloaded:
-                for chapter in dictMangaDownloaded[manga]:
+                for chapter in dictMangaDownloaded[manga]["Chapters"]:
                     chapterPath = os.path.join(self.downloadPath,manga,chapter)
                     table = dictMangaDownloaded[manga]["Table"]
                     if self.checkDownloadedItems(chapterPath, manga, chapter, table) is True:
-                        imgList = dictMangaDownloaded[manga][chapter]
+                        imgList = dictMangaDownloaded[manga]["Chapters"][chapter]
                         payload = ','.join(imgList)
                         self.req.createPayload(manga,chapter,payload)
                         req = self.req.sendRequest()

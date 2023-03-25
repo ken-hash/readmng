@@ -121,10 +121,13 @@ class MySQLClass:
 
     def getLastUpdated(self, condition='True', table='ReadMng'):
         self.connect()
-        sql = f"SELECT LastUpdated FROM {table} WHERE {condition} ORDER BY LastUpdated DESC LIMIT 1"
+        sql = f"SELECT Title, LatestChapter, LastUpdated FROM {table} WHERE {condition} ORDER BY Title"
         self.mycursor.execute(sql,)
-        res = self.mycursor.fetchone()
-        return res
+        res = self.mycursor.fetchall()
+        dictManga = {}
+        for row in res:
+            dictManga[row['Title']] = (row['LatestChapter'], row['LastUpdated'])
+        return dictManga
     
     '''
     Queue Points

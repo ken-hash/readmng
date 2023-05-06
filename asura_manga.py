@@ -23,10 +23,9 @@ class AsuraManga:
         chrome_options.add_experimental_option('useAutomationExtension', False)
         self.driver = webdriver.Chrome(options=chrome_options, service=ChromeService( 
 	ChromeDriverManager().install()))
+        self.mangaLink = mangaLink
         if mangaLink is None:
             self.getMangaLinks()
-        else:
-            self.mangaLink = mangaLink
         if self.validateItems(title) is None:
             raise Exception(f'Error {title} is Invalid ')
         self.chapterNumLinks = {}
@@ -38,6 +37,8 @@ class AsuraManga:
             self.downloadPath = os.path.join('/','mnt','MangaPi','downloads')
         
     def getMangaLinks(self):
+        if self.mangaLink is not None:
+            return self.mangaLink
         allMangaList = "https://www.asurascans.com/manga/list-mode/"
         try:
             self.driver.get(allMangaList)
@@ -213,7 +214,7 @@ class AsuraManga:
             chaptersChecked = self.sql.getExtraInformation(self.title,'AsuraScans') 
             self.sql.updateValue(self.title,orderedList[0],'no','AsuraScans')
         else:
-            self.sql.insertValue(self.title,orderedList[0],'AsuraScans')
+            self.sql.insertValue(self.title,orderedList[0],table='AsuraScans')
             chaptersChecked = self.sql.getExtraInformation(self.title,'AsuraScans') 
         return self.sqlLinks(chaptersChecked)
 
@@ -322,7 +323,7 @@ if __name__ == "__main__":
             asura.driver.quit()
         '''
         sql = MySQLClass()
-        mangas = sql.getAllMangaList(table='AsuraScans')
+        mangas = sql.getAllMangaList(options='ExtraInformation =\',\'',table='AsuraScans')
         for manga in mangas:
             asura = AsuraManga(manga['Title'], mangaList)
             if mangaList is None:

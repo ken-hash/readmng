@@ -36,6 +36,13 @@ class Sort:
             for y in trysorted:
                 sortedString += f'{y},'
             self.sql.updateExtraInformation(manga['Title'], sortedString,'off',table=table)
+        self.sql.connect()
+        sql = f'''UPDATE {table}
+                SET LastUpdated = DATE_SUB(DATE(LastUpdated), INTERVAL 1 MINUTE)
+                WHERE TIMESTAMPDIFF(MINUTE, DATE(LastUpdated), CURDATE()) = 2 * 24 * 60;'''
+        self.sql.mycursor.execute(sql,)
+        self.sql.conn.commit()
+        self.sql.disconnect()
 
 if __name__ == "__main__":
     sort = Sort()

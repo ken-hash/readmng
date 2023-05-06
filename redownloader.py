@@ -50,7 +50,7 @@ class Redownloader:
         #gets to appear in mangareader
         for item in os.listdir(folder):
             itemPath = os.path.join(folder,item)
-            if os.path.getsize(itemPath)==0:
+            if (os.path.getsize(itemPath)>5*1024 and os.path.getsize(itemPath)<7*1024) or os.path.getsize(itemPath)==0*1024:
                 if needsToRedownload == False:
                     needsToRedownload = True
                 print(itemPath+' needs to be removed.')
@@ -67,7 +67,6 @@ class Redownloader:
             if title not in self.asuraReDL and table=='AsuraScans':
                 self.asuraReDL.append(title)
             self.sql.updateExtraInformation(title,newExtraInfo,'off', table=table)
-                    
 
 if __name__ == "__main__":
     args = sys.argv[1:]

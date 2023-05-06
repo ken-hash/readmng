@@ -9,6 +9,7 @@ class MSSQLClass:
         load_dotenv()
         self.password = getenv("ubuntuPass")
         self.user = getenv("ubuntuUser")
+        self.mycursor = None
         # Trusted Connection to Named Instance
 
     def connect(self):
@@ -54,3 +55,53 @@ class MSSQLClass:
         results = [dict(zip([column[0] for column in self.mycursor.description], row)) for row in mangaChapterList]
         self.disconnect()
         return results
+    
+    def doesMangaExist(self, manga):
+        self.connect()
+        sql = f"SELECT COUNT(1) FROM dbo.Mangas WHERE Name = \'{manga}\'"
+        self.mycursor.execute(sql,)
+        res = self.mycursor.fetchone()
+        if res[0] > 0:
+            sql = f"SELECT MangaId FROM dbo.Mangas WHERE Name = \'{manga}\'"
+            self.mycursor.execute(sql,)
+            res = self.mycursor.fetchone()
+            return res[0]
+        else:
+            return self.insertManga(manga)
+        
+    def insertManga(self, manga):
+        self.connect()
+        sql = f"INSERT INTO dbo.Mangas(Name) VALUES (\'{manga}\');"
+        self.mycursor.execute(sql,)
+        self.connection.commit()
+        sql = f"SELECT MangaId FROM dbo.Mangas WHERE Name = \'{manga}\';"
+        self.mycursor.execute(sql,)
+        primary_key = self.mycursor.fetchone()[0]
+        return primary_key
+
+    def insertMangaLog(self, mangaChaptersId, dateTime, mangaId):
+        self.connect()
+        sql = f"INSERT INTO dbo.MangaLogs(Status, DateTime, MangaId, MangaChaptersId) VALUES (\'Added\',\'{dateTime}\', \'{mangaId}\',\'{mangaChaptersId}\')"
+        self.mycursor.execute(sql,)
+        self.connection.commit()
+
+    def insertMangaChapter(self, mangaChapter, path, mangaId):
+        self.connect()
+        sql = f"INSERT INTO dbo.MangaChapters(MangaChapter, Path, MangaId) VALUES (\'{mangaChapter}\', \'{path}\', \'{mangaId}\');"
+        self.mycursor.execute(sql,)
+        self.connection.commit()
+        sql = f" SELECT MangaChaptersId FROM dbo.MangaChapters WHERE MangaChapter=\'{mangaChapter}\' AND MangaId = \'{mangaId}\';"
+        self.mycursor.execute(sql,)
+        primary_key = self.mycursor.fetchone()[0]
+        return primary_key
+        
+    def addMangaChapter(self, manga, chapter, path, time=datetime.today):
+        mangaId = self.doesMangaExist(manga) 
+        chapterId = self.insertMangaChapter(mangaChapter=chapter, path=path, mangaId=mangaId)
+        self.insertMangaLog(mangaId=mangaId, mangaChaptersId=chapterId, dateTime=time)
+
+
+
+
+    
+

@@ -44,9 +44,12 @@ class MySQLClass:
             self.disconnect()
             return False
 
-    def  insertValue(self, title, lastChapter, table='ReadMng'):
+    def  insertValue(self, title, lastChapter, Folder=None, table='ReadMng'):
         self.connect()
-        sql = f"INSERT INTO {table}(Title, LatestChapter, LastUpdated) VALUES ('{title}','{lastChapter}','{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}')"
+        if Folder is None:
+            sql = f"INSERT INTO {table}(Title, LatestChapter, LastUpdated) VALUES ('{title}','{lastChapter}','{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}')"
+        else:
+            sql = f"INSERT INTO {table}(Title, Folder, LatestChapter, LastUpdated) VALUES ('{title}','{Folder}','{lastChapter}','{datetime.today().strftime('%Y-%m-%d %H:%M:%S')}')"
         self.mycursor.execute(sql,)
         self.conn.commit()
         self.disconnect()
@@ -79,7 +82,7 @@ class MySQLClass:
     '''
     def updateValue(self, title, lastChapter,option='yes', table='ReadMng'):
         if self.doesExist(title, table) is False:
-            self.insertValue(title, lastChapter, table)
+            self.insertValue(title, lastChapter, table=table)
         self.connect()
         if option=='no':
             sql = f"UPDATE {table} SET LatestChapter ='{lastChapter}' WHERE Title = '{title}'"
@@ -91,7 +94,7 @@ class MySQLClass:
 
     def getExtraInformation(self, title, table='ReadMng'):
         if self.doesExist(title,table) is False:
-            self.insertValue(title, 0, table)
+            self.insertValue(title, 0, table=table)
         self.connect()
         sql = f"SELECT ExtraInformation FROM {table} WHERE Title = %s"
         self.mycursor.execute(sql,(title,))

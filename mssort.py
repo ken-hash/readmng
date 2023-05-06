@@ -36,6 +36,8 @@ class Sort:
         id = None
         for elem in range(len(self.sorted)):
             #if sorted elem doesnt match unsorted elem then
+            if elem == 58:
+                pass
             if self.sorted[elem]!=self.unsorted[elem]:
                 #if retry count goes more than 3 then force next elem in db to change datetime
                 if self.lastChap == self.sorted[elem]:
